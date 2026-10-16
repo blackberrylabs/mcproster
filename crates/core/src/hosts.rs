@@ -144,6 +144,9 @@ pub struct HostRule {
     pub vendor: Option<String>,
     pub kind: String,
     pub status: Status,
+    /// The application several rules belong to (Claude Desktop: configuration file and
+    /// `.mcpb` extensions). Costs are summed per application. Defaults to the host name.
+    pub application: Option<String>,
     #[serde(default)]
     pub references: Vec<String>,
     pub remove_hint: Option<String>,

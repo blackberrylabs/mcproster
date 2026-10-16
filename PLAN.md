@@ -97,6 +97,6 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 - [x] Reliquats : actions sous chaque constat en CLI ; constat `package-not-cached` (npx `~/.npm/_npx`, uv `archive-v0`, pipx) — 2026-10-16
 - [x] `docs/context-cost.md` (methode, seuils D8, ce qui est garde D9, caches, limites) — 2026-10-16
 - [x] Tests : faux serveur lourd (14 outils, > seuil), rapport de cout sur le faux home avec sondes synthetiques (seuils, non sondes, echecs, borne haute), caches npx/uv simules, « aucune description dans probes.json » — 33 tests verts — 2026-10-16
-- [ ] Passage reel sur la machine d'Alexandre (Apipriceindex, Eliot : cout de leurs 3 et 22 outils)
+- [x] Passage reel : `probe --all` avec confirmation, Apipriceindex ~532 tokens (3 outils), Eliot ~2 370 (22 outils) ; seuils confirmes plausibles ; defaut vu et corrige : cout regroupe par **application** (Claude Desktop config + extensions = une ligne) — 2026-10-16
 - [x] Captures README (clair, sombre, home de demonstration), CHANGELOG 0.2.0, README 0.2 — 2026-10-16
 - [ ] Paquets 0.2.0, tag et release — sur accord

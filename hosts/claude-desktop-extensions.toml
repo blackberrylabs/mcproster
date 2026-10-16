@@ -8,6 +8,7 @@ name = "Claude Desktop (extensions, .mcpb)"
 vendor = "Anthropic"
 kind = "desktop"
 status = "active"
+application = "Claude Desktop"
 references = ["${__dirname}", "${user_config.KEY}"]
 
 # One manifest.json per installed bundle. The server entry is `server.mcp_config`.

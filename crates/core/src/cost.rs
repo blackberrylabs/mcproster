@@ -24,9 +24,13 @@ pub struct ServerCost {
     pub heaviest: Vec<(String, u64)>,
 }
 
+/// One line per *application*: the Claude Desktop configuration file and its `.mcpb`
+/// extensions are two host rules but one application, so their costs are summed.
 #[derive(Debug, Clone, Serialize)]
 pub struct HostCost {
+    /// Id of the first host rule of the application (for lookups).
     pub host: String,
+    /// Application name.
     pub host_name: String,
     /// Sum over the enabled stdio servers this host declares that have been probed.
     pub tokens: u64,
@@ -88,13 +92,23 @@ pub fn report(inv: &Inventory, probes: &BTreeMap<String, ProbeResult>) -> CostRe
             heaviest,
         });
     }
-    // Per host: every enabled declaration of the host, grouped by its server identity so a
-    // server declared twice by the same host counts once.
+    // Per application (one or more host rules): every enabled declaration of its hosts,
+    // grouped by server identity so a server declared twice by the same application
+    // counts once.
+    let mut apps: Vec<(String, Vec<&crate::inventory::HostStatus>)> = Vec::new();
     for h in inv
         .hosts
         .iter()
         .filter(|h| h.declarations > 0 || h.files_found > 0)
     {
+        match apps.iter_mut().find(|(a, _)| *a == h.application) {
+            Some((_, list)) => list.push(h),
+            None => apps.push((h.application.clone(), vec![h])),
+        }
+    }
+    for (application, rules) in apps {
+        let ids: Vec<&str> = rules.iter().map(|h| h.id.as_str()).collect();
+        let any_defer = ids.iter().any(|id| may_defer(id));
         let mut tokens = 0u64;
         let mut probed = 0usize;
         let mut unprobed = 0usize;
@@ -106,7 +120,7 @@ pub fn report(inv: &Inventory, probes: &BTreeMap<String, ProbeResult>) -> CostRe
                 .declarations
                 .iter()
                 .map(|&i| &inv.declarations[i])
-                .any(|d| d.enabled && d.hosts.contains(&h.id));
+                .any(|d| d.enabled && d.hosts.iter().any(|h| ids.contains(&h.as_str())));
             if !declared_here || seen.contains(&s.identity.as_str()) {
                 continue;
             }
@@ -136,33 +150,33 @@ pub fn report(inv: &Inventory, probes: &BTreeMap<String, ProbeResult>) -> CostRe
                 .declarations
                 .iter()
                 .enumerate()
-                .filter(|(_, d)| d.enabled && d.hosts.contains(&h.id))
+                .filter(|(_, d)| d.enabled && d.hosts.iter().any(|h| ids.contains(&h.as_str())))
                 .map(|(i, _)| i)
                 .collect();
             out.findings.push(Finding {
                 kind: FindingKind::ContextCost,
                 message: format!(
                     "{}: ~{} tokens of MCP tool definitions across {} probed server(s){} — above {}{}",
-                    h.name,
+                    application,
                     thousands(tokens),
                     probed,
                     if unprobed > 0 { format!(" (at least: {unprobed} not probed)") } else { String::new() },
                     thousands(HOST_THRESHOLD),
-                    if may_defer(&h.id) { "; this host can load tools on demand, so this is an upper bound" } else { "" }
+                    if any_defer { "; this host can load tools on demand, so this is an upper bound" } else { "" }
                 ),
                 declarations: decls,
                 file: None,
             });
         }
         out.hosts.push(HostCost {
-            host: h.id.clone(),
-            host_name: h.name.clone(),
+            host: ids[0].to_string(),
+            host_name: application,
             tokens,
             probed,
             unprobed,
             failed,
             remote,
-            may_defer: may_defer(&h.id),
+            may_defer: any_defer,
         });
     }
     out

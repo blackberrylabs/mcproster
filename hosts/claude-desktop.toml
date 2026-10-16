@@ -8,6 +8,7 @@ name = "Claude Desktop"
 vendor = "Anthropic"
 kind = "desktop"
 status = "active"
+application = "Claude Desktop"
 # Variables the host expands itself: references, not secrets.
 references = []
 

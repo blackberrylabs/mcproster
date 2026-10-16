@@ -19,6 +19,8 @@ pub struct HostStatus {
     pub id: String,
     pub name: String,
     pub kind: String,
+    /// Application the host rule belongs to (several rules may share one).
+    pub application: String,
     pub files_found: usize,
     pub declarations: usize,
 }
@@ -113,6 +115,10 @@ pub fn run(rules: &Rules, env: &Env) -> Inventory {
             id: host.id.clone(),
             name: host.name.clone(),
             kind: host.kind.clone(),
+            application: host
+                .application
+                .clone()
+                .unwrap_or_else(|| host.name.clone()),
             files_found,
             declarations: decls,
         });

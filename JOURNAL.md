@@ -7,6 +7,20 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, nuit : passage reel de la 0.2
+
+- `probe --all` chez Alexandre : la confirmation liste les deux lancements, `y`, les deux
+  repondent. Apipriceindex 3 outils ~532 tokens (~177/outil), Eliot 22 outils ~2 370
+  (~108/outil, descriptions en francais, courtes). Aucun des deux n'approche 5 000 : le
+  seuil separe bien le normal (quelques centaines par outil) du lourd (les 26 outils / 33 Ko
+  de l'article). Le constat doublon reste le seul.
+- Defaut de lecture vu sur la sortie : « Claude Desktop » et « Claude Desktop (extensions,
+  .mcpb) » sont deux regles mais une application ; le total reel etait ~2 900 et non deux
+  lignes. Corrige : champ `application` dans les regles d'hote (les deux regles Claude
+  Desktop le partagent), le rapport de cout somme par application, une ligne. Test ajuste,
+  `docs/context-cost.md` et `docs/hosts.md` mis a jour.
+- Paquets 0.2.0 reconstruits avec cette correction ; empreintes verifiees sur la machine.
+
 ## 2026-10-16, nuit : la 0.2 codee
 
 - Coeur : chaque outil de `tools/list` est pese (caracteres du JSON / 4, « ~ »), par

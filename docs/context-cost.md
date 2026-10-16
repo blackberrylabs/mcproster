@@ -23,8 +23,10 @@ weighs them.
   serialises tool definitions its own way (some add a prefix per server, some reformat the
   schema), so the figure is an **estimate, ±20 %**, always shown with "~".
 - Per server: number of tools, ~tokens, the three heaviest tools.
-- Per host: the sum over the **enabled** stdio servers the host declares that have been
-  probed. A server declared twice by the same host counts once. Servers not probed yet make
+- Per host — more exactly per *application*: the Claude Desktop configuration file and its
+  `.mcpb` extensions are two host rules but one application, so their costs are summed
+  (rule field `application`). The sum covers the **enabled** stdio servers the application
+  declares that have been probed. A server declared twice by the same host counts once. Servers not probed yet make
   the total "at least"; failed probes are counted separately; remote servers are never
   probed (no network) and are listed as such.
 - **Claude Code** can load MCP tools on demand (tool search) instead of sending them all at

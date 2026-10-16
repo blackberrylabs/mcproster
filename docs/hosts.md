@@ -16,6 +16,7 @@ id = "cursor"                 # stable identifier, file name
 name = "Cursor"               # as shown
 vendor = "Anysphere"
 kind = "editor"               # desktop | cli | editor | extension
+application = "Cursor"        # optional: several rules of one application share it (costs are summed per application)
 status = "active"             # active | out-of-scope
 references = ["${env:NAME}"]  # variable syntaxes the host expands itself: never masked, never a secret
 remove_hint = "…"             # optional: the host's own command to remove a server (displayed only)

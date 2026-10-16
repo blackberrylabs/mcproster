@@ -111,11 +111,14 @@ fn per_server_and_per_host_with_thresholds() {
     let cd = report
         .hosts
         .iter()
-        .find(|h| h.host == "claude-desktop")
+        .find(|h| h.host_name == "Claude Desktop")
         .unwrap();
+    // One application: configuration file + .mcpb extensions. apipriceindex (21 000) and
+    // filesystem (700) probed; openai and eliot not probed.
     assert_eq!(cd.tokens, 21_700);
     assert_eq!(cd.probed, 2);
-    assert_eq!(cd.unprobed, 1);
+    assert_eq!(cd.unprobed, 2);
+    assert!(!report.hosts.iter().any(|h| h.host_name.contains("extensions")));
     assert!(cd.tokens > HOST_THRESHOLD);
     assert!(report
         .findings
