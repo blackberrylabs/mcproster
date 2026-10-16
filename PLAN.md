@@ -100,4 +100,6 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 - [x] Passage reel : `probe --all` avec confirmation, Apipriceindex ~532 tokens (3 outils), Eliot ~2 370 (22 outils) ; seuils confirmes plausibles ; defaut vu et corrige : cout regroupe par **application** (Claude Desktop config + extensions = une ligne) — 2026-10-16
 - [x] Captures README (clair, sombre, home de demonstration), CHANGELOG 0.2.0, README 0.2 — 2026-10-16
 - [x] Paquets 0.2.0 construits et verifies ; app validee par Alexandre (« c'est bon pour moi ») ; note de version prete — 2026-10-16
-- [ ] Tag `v0.2.0`, push, release — commandes donnees, en cours
+- [x] Tag `v0.2.0` pousse, release publiee ; verifiee depuis le cloud : quatre fichiers, `sha256sum -c` OK, `.deb` extrait → `mcproster 0.2.0`, rapport de cout identique — 2026-10-16
+
+**Etape 6 close le 2026-10-16. MCProster 0.2.0 est publie.** Reste pour plus tard : Kilo Code, textes de presentation (decision d'Alexandre), `.rpm` a tester sur Fedora.

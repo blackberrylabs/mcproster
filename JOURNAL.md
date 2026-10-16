@@ -7,6 +7,15 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, MCProster 0.2.0 publie
+
+- Tag `v0.2.0` sur `main`, release avec les quatre fichiers. Verifie depuis le cloud : tous
+  telecharges, empreintes OK, `.deb` extrait → `mcproster 0.2.0`, `context` sur le home de
+  demonstration identique au cloud ; captures README servies.
+- Journee complete : Cleanator 0.1.1 le matin, MCProster 0.1.0 l'apres-midi, lecture des
+  douleurs de la communaute, cadrage et 0.2.0 le soir. Etape 6 close. MCProster en veille
+  active ; prochain outil pressenti : l'inventaire des permissions des agents.
+
 ## 2026-10-16, nuit : passage reel de la 0.2
 
 - `probe --all` chez Alexandre : la confirmation liste les deux lancements, `y`, les deux
