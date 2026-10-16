@@ -3,6 +3,17 @@
 All notable changes to MCProster. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.1] — unreleased
+
+### Changed
+
+- The common ground of the host rules (schema, loading, validation, path resolution,
+  readers, secret masking) moved to the shared crate
+  [`hostrules`](https://github.com/blackberrylabs/hostrules), so the next Blackberrylabs
+  tool reads the same files the same way. No change to what MCProster shows; the only
+  visible difference is in `mcproster --json hosts`, where `remove_hint` / `list_hint`
+  became a `hints` table (`hints.remove`, `hints.list`).
+
 ## [0.2.0] — 2026-10-16
 
 What your MCP servers cost in the model's context — the question the community was

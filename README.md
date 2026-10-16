@@ -143,8 +143,11 @@ could take. English by default, French on demand; light and dark.
 
 ## How it is built
 
-A Rust workspace: `crates/core` (rules, readers, inventory, probe — no UI, no network),
+A Rust workspace: `crates/core` (rules, inventory, probe, cost — no UI, no network),
 `crates/cli`, `crates/app` (iced). Host rules in `hosts/*.toml`, embedded in the binaries.
+The rule schema, path resolution, file readers and secret masking come from
+[`hostrules`](https://github.com/blackberrylabs/hostrules), the crate shared by the
+Blackberrylabs tools.
 `#![forbid(unsafe_code)]` everywhere. The design brief, plan and journal are kept in French
 at the root (`BRIEF.md`, `PLAN.md`, `JOURNAL.md`); code, comments and documentation are in
 English.

@@ -43,7 +43,7 @@ pub fn actions_for(rules: &Rules, inv: &Inventory, f: &Finding) -> Vec<Action> {
                 });
                 continue;
             }
-            match rules.host(hid).and_then(|h| h.remove_hint.clone()) {
+            match rules.host(hid).and_then(|h| h.hint("remove")) {
                 Some(h) => {
                     let command = h.replace("<name>", &d.name).replace(
                         "<user|local|project>",

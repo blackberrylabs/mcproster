@@ -87,7 +87,7 @@ enum Command {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    let rules = Rules::embedded();
+    let rules = mcproster_core::hosts::embedded();
     if let Command::Hosts = cli.command {
         return hosts(&rules, cli.json);
     }

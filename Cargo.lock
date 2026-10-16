@@ -1501,6 +1501,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfa686283ad6dd069f105e5ab091b04c62850d3e4cf5d67debad1933f55023df"
 
 [[package]]
+name = "hostrules"
+version = "0.1.0"
+source = "git+https://github.com/blackberrylabs/hostrules?tag=v0.1.0#9555016aa7f62498b36a72e81267f6129bcda18e"
+dependencies = [
+ "glob",
+ "regex",
+ "serde",
+ "serde_json",
+ "serde_yaml_ng",
+ "thiserror 2.0.21",
+ "toml",
+]
+
+[[package]]
 name = "iana-time-zone"
 version = "0.1.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1934,7 +1948,7 @@ dependencies = [
 
 [[package]]
 name = "mcproster"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "iced",
  "mcproster-core",
@@ -1944,7 +1958,7 @@ dependencies = [
 
 [[package]]
 name = "mcproster-cli"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1954,11 +1968,12 @@ dependencies = [
 
 [[package]]
 name = "mcproster-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "chrono",
  "glob",
+ "hostrules",
  "regex",
  "serde",
  "serde_json",

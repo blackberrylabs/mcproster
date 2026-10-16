@@ -9,8 +9,8 @@ vendor = "Anthropic"
 kind = "cli"
 status = "active"
 references = ["${VAR}", "${VAR:-default}", "${CLAUDE_PLUGIN_ROOT}"]
-remove_hint = "claude mcp remove <name> --scope <user|local|project>"
-list_hint = "claude mcp list"
+hints.remove = "claude mcp remove <name> --scope <user|local|project>"
+hints.list = "claude mcp list"
 
 # User scope: every project, private to the user.
 [[locations]]

@@ -9,8 +9,8 @@ vendor = "OpenAI"
 kind = "cli"
 status = "active"
 references = []
-remove_hint = "codex mcp remove <name>"
-list_hint = "codex mcp list"
+hints.remove = "codex mcp remove <name>"
+hints.list = "codex mcp list"
 
 [[locations]]
 scope = "user"

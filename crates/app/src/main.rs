@@ -90,7 +90,7 @@ impl App {
         let lang = settings.initial_lang();
         let strings = Strings::load(lang);
         let env = Env::current();
-        let rules = Arc::new(Rules::embedded());
+        let rules = Arc::new(mcproster_core::hosts::embedded());
         let probes = probe::load_results(&env.home);
         let status = strings.t("header.scanning", &[]);
         let task = load(rules.clone(), env.clone());

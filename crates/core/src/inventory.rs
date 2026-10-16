@@ -8,8 +8,10 @@ use regex::Regex;
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::env::{Env, Os};
-use crate::hosts::{Entry, HostRule, Location, OneOrMany, Rules, Scope};
+use hostrules::resolve::{project_roots, resolve};
+use hostrules::Env;
+
+use crate::hosts::{Entry, HostRule, Location, Rules};
 use crate::model::{Declaration, FileStatus, Finding, FindingKind, Server, Transport};
 use crate::read::{dig, get, line_of, read_tree};
 use crate::secrets::{self, Masked, ValueKind};
@@ -56,7 +58,11 @@ pub fn run(rules: &Rules, env: &Env) -> Inventory {
         let mut files_found = 0;
         let mut decls = 0;
         for (li, loc) in host.locations.iter().enumerate() {
-            for (file, project) in resolve(loc, env, &roots) {
+            for hostrules::resolve::Resolved {
+                path: file,
+                project,
+            } in resolve(loc, env, &roots)
+            {
                 if !file.is_file() {
                     continue;
                 }
@@ -115,10 +121,7 @@ pub fn run(rules: &Rules, env: &Env) -> Inventory {
             id: host.id.clone(),
             name: host.name.clone(),
             kind: host.kind.clone(),
-            application: host
-                .application
-                .clone()
-                .unwrap_or_else(|| host.name.clone()),
+            application: host.application().to_string(),
             files_found,
             declarations: decls,
         });
@@ -195,7 +198,11 @@ pub fn package_cached(env: &Env, command: &str, package: &str) -> Option<bool> {
                 .join(".npm/_npx/*/node_modules")
                 .join(package)
                 .join("package.json");
-            Some(expand_glob(&pattern).into_iter().any(|p| p.is_file()))
+            Some(
+                hostrules::resolve::expand_glob(&pattern)
+                    .into_iter()
+                    .any(|p| p.is_file()),
+            )
         }
         "uvx" | "pipx" => {
             let name = package.replace('-', "_").to_lowercase();
@@ -204,101 +211,28 @@ pub fn package_cached(env: &Env, command: &str, package: &str) -> Option<bool> {
                 .join(".cache/uv/archive-v0/*/lib/python*/site-packages")
                 .join(&name);
             let pattern2 = env.home.join(".local/pipx/venvs").join(package);
-            Some(expand_glob(&pattern).into_iter().any(|p| p.is_dir()) || pattern2.is_dir())
+            Some(
+                hostrules::resolve::expand_glob(&pattern)
+                    .into_iter()
+                    .any(|p| p.is_dir())
+                    || pattern2.is_dir(),
+            )
         }
         _ => None,
     }
 }
 
-/// Project roots: the explicit ones, plus the projects Claude Code knows (`projects.*` in
-/// `~/.claude.json`), which are absolute paths of directories the user actually works in.
-fn project_roots(env: &Env) -> Vec<PathBuf> {
-    let mut roots: BTreeSet<PathBuf> = env.roots.iter().cloned().collect();
-    let claude = env.home.join(".claude.json");
-    if let Ok((_, tree)) = read_tree(&claude, crate::hosts::Format::Json) {
-        if let Some(projects) = tree.get("projects").and_then(Value::as_object) {
-            for k in projects.keys() {
-                let p = PathBuf::from(k);
-                if p.is_dir() {
-                    roots.insert(p);
-                }
-            }
-        }
-    }
-    roots.into_iter().collect()
-}
-
-/// Files a location designates on this machine, with the project root for per-project ones.
-fn resolve(loc: &Location, env: &Env, roots: &[PathBuf]) -> Vec<(PathBuf, Option<PathBuf>)> {
-    let mut specs: Vec<&str> = Vec::new();
-    let os_specs: Option<&OneOrMany> = match env.os {
-        Os::Linux => loc.path.linux.as_ref(),
-        Os::Macos => loc.path.macos.as_ref(),
-        Os::Windows => loc.path.windows.as_ref(),
-    };
-    if let Some(a) = &loc.path.any {
-        specs.extend(a.iter());
-    }
-    if let Some(o) = os_specs {
-        specs.extend(o.iter());
-    }
-    let mut out: Vec<(PathBuf, Option<PathBuf>)> = Vec::new();
-    let mut seen = BTreeSet::new();
-    let mut push = |p: PathBuf, root: Option<PathBuf>| {
-        if seen.insert(p.clone()) {
-            out.push((p, root));
-        }
-    };
-    for spec in specs {
-        // A per-project location whose project is a key inside a user file (Claude Code
-        // local scope) is resolved like a user path.
-        let in_file = loc.project_key.is_some();
-        match loc.scope {
-            Scope::Project if !in_file => {
-                for root in roots {
-                    for p in expand_glob(&root.join(spec)) {
-                        push(p, Some(root.clone()));
-                    }
-                }
-            }
-            Scope::User | Scope::System | Scope::Project => {
-                if let Some(expanded) = env.expand(spec) {
-                    for p in expand_glob(&expanded) {
-                        push(p, None);
-                    }
-                }
-            }
-        }
-    }
-    out
-}
-
-fn expand_glob(p: &Path) -> Vec<PathBuf> {
-    let s = p.to_string_lossy();
-    if !s.contains('*') {
-        return vec![p.to_path_buf()];
-    }
-    match glob::glob(&s) {
-        Ok(paths) => {
-            let mut v: Vec<PathBuf> = paths.flatten().collect();
-            v.sort();
-            v
-        }
-        Err(_) => Vec::new(),
-    }
-}
-
 fn collect_registry(loc: &Location, tree: &Value, meta: &mut BTreeMap<String, Meta>) {
-    for (_, node) in dig(tree, &loc.servers_key) {
+    for (_, node) in dig(tree, &loc.ext.servers_key) {
         let Some(obj) = node.as_object() else {
             continue;
         };
         for (id, spec) in obj {
             let m = meta.entry(id.clone()).or_default();
-            if let Some(v) = first_str(spec, &loc.mapped("version")) {
+            if let Some(v) = first_str(spec, &loc.ext.mapped("version")) {
                 m.version = Some(v);
             }
-            if let Some(e) = first_bool(spec, &loc.mapped("enabled")) {
+            if let Some(e) = first_bool(spec, &loc.ext.mapped("enabled")) {
                 m.enabled = Some(e);
             }
         }
@@ -310,7 +244,7 @@ fn collect_settings(loc: &Location, file: &Path, tree: &Value, meta: &mut BTreeM
         return;
     };
     let m = meta.entry(id).or_default();
-    if let Some(e) = first_bool(tree, &loc.mapped("enabled")) {
+    if let Some(e) = first_bool(tree, &loc.ext.mapped("enabled")) {
         m.enabled = Some(e);
     }
 }
@@ -354,7 +288,7 @@ pub fn entries<'a>(
     project: Option<&Path>,
 ) -> Vec<(String, Option<PathBuf>, &'a Value)> {
     let mut out = Vec::new();
-    for (wild, node) in dig(tree, &loc.servers_key) {
+    for (wild, node) in dig(tree, &loc.ext.servers_key) {
         // The project path may be a key inside the file (Claude Code local scope).
         let project_in_file = loc
             .project_key
@@ -362,7 +296,7 @@ pub fn entries<'a>(
             .and_then(|_| wild.first())
             .map(PathBuf::from);
         let project = project_in_file.or_else(|| project.map(Path::to_path_buf));
-        let pairs: Vec<(String, &Value)> = match loc.entry {
+        let pairs: Vec<(String, &Value)> = match loc.ext.entry {
             Entry::Object => match node.as_object() {
                 Some(o) => o.iter().map(|(k, v)| (k.clone(), v)).collect(),
                 None => Vec::new(),
@@ -373,6 +307,7 @@ pub fn entries<'a>(
                     .enumerate()
                     .map(|(i, v)| {
                         let name = loc
+                            .ext
                             .name_key
                             .as_ref()
                             .and_then(|k| get(v, k))
@@ -386,6 +321,7 @@ pub fn entries<'a>(
             },
             Entry::Single => {
                 let name = loc
+                    .ext
                     .name_key
                     .as_ref()
                     .and_then(|k| get(tree, k))
@@ -405,7 +341,7 @@ pub fn entries<'a>(
                 continue;
             }
             // Goose: built-in extensions are not declared MCP servers.
-            if first_str(spec, &loc.mapped("type")).as_deref() == Some("builtin") {
+            if first_str(spec, &loc.ext.mapped("type")).as_deref() == Some("builtin") {
                 continue;
             }
             out.push((name, project.clone(), spec));
@@ -442,12 +378,12 @@ fn declaration(
     project: Option<PathBuf>,
 ) -> Declaration {
     // command + args
-    let mut command = first_str(spec, &loc.mapped("command"));
-    let mut args: Vec<String> = first_node(spec, &loc.mapped("args"))
+    let mut command = first_str(spec, &loc.ext.mapped("command"));
+    let mut args: Vec<String> = first_node(spec, &loc.ext.mapped("args"))
         .map(str_list)
         .unwrap_or_default();
-    if loc.command_is_array {
-        if let Some(arr) = first_node(spec, &loc.mapped("command")).and_then(Value::as_array) {
+    if loc.ext.command_is_array {
+        if let Some(arr) = first_node(spec, &loc.ext.mapped("command")).and_then(Value::as_array) {
             let mut items: Vec<String> = arr.iter().map(scalar).collect();
             if !items.is_empty() {
                 command = Some(items.remove(0));
@@ -455,32 +391,32 @@ fn declaration(
             }
         }
     }
-    let url_raw = first_str(spec, &loc.mapped("url"));
-    let type_raw = first_str(spec, &loc.mapped("type")).unwrap_or_default();
+    let url_raw = first_str(spec, &loc.ext.mapped("url"));
+    let type_raw = first_str(spec, &loc.ext.mapped("type")).unwrap_or_default();
     let transport = Transport::from_type(&type_raw, url_raw.is_some());
 
-    let env_pairs = kv_pairs(first_node(spec, &loc.mapped("env")));
-    let header_pairs = kv_pairs(first_node(spec, &loc.mapped("headers")));
+    let env_pairs = kv_pairs(first_node(spec, &loc.ext.mapped("env")));
+    let header_pairs = kv_pairs(first_node(spec, &loc.ext.mapped("headers")));
 
-    let mut env_keys: Vec<String> = first_node(spec, &loc.mapped("env_keys"))
+    let mut env_keys: Vec<String> = first_node(spec, &loc.ext.mapped("env_keys"))
         .map(str_list)
         .unwrap_or_default();
-    if let Some(b) = first_str(spec, &loc.mapped("bearer_env")) {
+    if let Some(b) = first_str(spec, &loc.ext.mapped("bearer_env")) {
         env_keys.push(b);
     }
-    if let Some(Value::Object(o)) = first_node(spec, &loc.mapped("env_headers")) {
+    if let Some(Value::Object(o)) = first_node(spec, &loc.ext.mapped("env_headers")) {
         env_keys.extend(o.values().map(scalar));
     }
 
     let enabled = match (
-        first_bool(spec, &loc.mapped("enabled")),
-        first_bool(spec, &loc.mapped("disabled")),
+        first_bool(spec, &loc.ext.mapped("enabled")),
+        first_bool(spec, &loc.ext.mapped("disabled")),
     ) {
         (Some(e), _) => e,
         (None, Some(d)) => !d,
         (None, None) => true,
     };
-    let trusted = first_bool(spec, &loc.mapped("trust")).unwrap_or(false)
+    let trusted = first_bool(spec, &loc.ext.mapped("trust")).unwrap_or(false)
         || ["autoApprove", "alwaysAllow"].iter().any(|k| {
             spec.get(*k)
                 .and_then(Value::as_array)
@@ -561,12 +497,12 @@ pub fn raw_launch(rules: &Rules, d: &Declaration) -> Option<Launch> {
         .find(|(name, p, _)| {
             *name == d.name && (loc.project_key.is_none() || p.as_deref() == project)
         })?;
-    let mut command = first_str(spec, &loc.mapped("command"));
-    let mut args: Vec<String> = first_node(spec, &loc.mapped("args"))
+    let mut command = first_str(spec, &loc.ext.mapped("command"));
+    let mut args: Vec<String> = first_node(spec, &loc.ext.mapped("args"))
         .map(str_list)
         .unwrap_or_default();
-    if loc.command_is_array {
-        if let Some(arr) = first_node(spec, &loc.mapped("command")).and_then(Value::as_array) {
+    if loc.ext.command_is_array {
+        if let Some(arr) = first_node(spec, &loc.ext.mapped("command")).and_then(Value::as_array) {
             let mut items: Vec<String> = arr.iter().map(scalar).collect();
             if !items.is_empty() {
                 command = Some(items.remove(0));
@@ -574,11 +510,11 @@ pub fn raw_launch(rules: &Rules, d: &Declaration) -> Option<Launch> {
             }
         }
     }
-    let env: BTreeMap<String, String> = match first_node(spec, &loc.mapped("env")) {
+    let env: BTreeMap<String, String> = match first_node(spec, &loc.ext.mapped("env")) {
         Some(Value::Object(o)) => o.iter().map(|(k, v)| (k.clone(), scalar(v))).collect(),
         _ => BTreeMap::new(),
     };
-    let cwd = first_str(spec, &loc.mapped("cwd"))
+    let cwd = first_str(spec, &loc.ext.mapped("cwd"))
         .map(PathBuf::from)
         .or_else(|| d.project.clone());
     Some((command?, args, env, cwd))

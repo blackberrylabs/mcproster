@@ -103,3 +103,9 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 - [x] Tag `v0.2.0` pousse, release publiee ; verifiee depuis le cloud : quatre fichiers, `sha256sum -c` OK, `.deb` extrait → `mcproster 0.2.0`, rapport de cout identique — 2026-10-16
 
 **Etape 6 close le 2026-10-16. MCProster 0.2.0 est publie.** Reste pour plus tard : Kilo Code, textes de presentation (decision d'Alexandre), `.rpm` a tester sur Fedora.
+
+## Etape 7. Version 0.2.1 — migration sur `hostrules`
+
+- [x] Coeur commun extrait dans `blackberrylabs/hostrules` v0.1.0 ; MCProster migre, sorties identiques — 2026-10-16
+- [ ] Commit 11, passage reel sur la machine d'Alexandre (`list`, `findings`, `context`)
+- [ ] Paquets 0.2.1, release — sur accord

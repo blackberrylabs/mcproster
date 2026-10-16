@@ -8,6 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
+hostrules = { git = "https://github.com/blackberrylabs/hostrules", tag = "v0.1.0" }
 anyhow.workspace = true
 thiserror.workspace = true
 serde.workspace = true

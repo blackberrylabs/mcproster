@@ -11,6 +11,11 @@ No rule may rest on memory.
 
 ## Rule schema
 
+The common part of the schema (identity, locations, paths per OS, sources, validation)
+comes from the shared crate [`hostrules`](https://github.com/blackberrylabs/hostrules);
+MCProster adds the fields an MCP inventory needs (`servers_key`, `entry`, `name_key`,
+`inputs_key`, `map`, `command_is_array`).
+
 ```toml
 id = "cursor"                 # stable identifier, file name
 name = "Cursor"               # as shown
@@ -19,8 +24,8 @@ kind = "editor"               # desktop | cli | editor | extension
 application = "Cursor"        # optional: several rules of one application share it (costs are summed per application)
 status = "active"             # active | out-of-scope
 references = ["${env:NAME}"]  # variable syntaxes the host expands itself: never masked, never a secret
-remove_hint = "…"             # optional: the host's own command to remove a server (displayed only)
-list_hint = "…"
+hints.remove = "…"            # optional: the host's own commands, displayed and never run
+hints.list = "…"
 
 [[locations]]
 scope = "user"                # user | project | system

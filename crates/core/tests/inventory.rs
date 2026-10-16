@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 use mcproster_core::env::Os;
 use mcproster_core::model::FindingKind;
-use mcproster_core::{inventory, Env, Rules};
+use mcproster_core::{hosts, inventory, Env};
 
 fn copy_fixture(home: &Path) {
     let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/home");
@@ -42,7 +42,7 @@ fn run() -> (tempfile::TempDir, inventory::Inventory) {
     let tmp = tempfile::tempdir().unwrap();
     copy_fixture(tmp.path());
     let env = Env::fixture(tmp.path(), Os::Linux);
-    let inv = inventory::run(&Rules::embedded(), &env);
+    let inv = inventory::run(&hosts::embedded(), &env);
     (tmp, inv)
 }
 
@@ -194,7 +194,7 @@ fn nothing_is_written() {
         .map(|p| (p.clone(), std::fs::read(&p).unwrap()))
         .collect();
     let env = Env::fixture(tmp.path(), Os::Linux);
-    let _ = inventory::run(&Rules::embedded(), &env);
+    let _ = inventory::run(&hosts::embedded(), &env);
     let after = walkdir(tmp.path());
     assert_eq!(after.len(), before.len());
     for (p, bytes) in before {

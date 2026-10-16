@@ -7,6 +7,19 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, soir — 0.2.1, la fondation commune
+
+- Permitt decide (BRIEF valide), donc troisieme outil, donc extraction du coeur commun
+  (convention du matin). La crate `hostrules` est nee ce soir : regles d'hotes sourcees,
+  env, lecteurs, masquage, resolution. MCProster migre dessus en une passe ; `hosts.rs`
+  ne garde que `McpLocation` et les regles embarquees. `--json list/findings/files`
+  identiques octet pour octet au faux home ; `hosts --json` : `hints` au lieu de
+  `remove_hint`/`list_hint`. Version 0.2.1, pas encore publiee.
+- Lecon : la fixture `.claude.json` et l'ordre des racines de projet se testent bien plus
+  simplement dans la crate (quatre tests de `resolve`) que par l'inventaire entier.
+
+---
+
 ## 2026-10-16, MCProster 0.2.0 publie
 
 - Tag `v0.2.0` sur `main`, release avec les quatre fichiers. Verifie depuis le cloud : tous

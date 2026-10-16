@@ -8,7 +8,7 @@ use mcproster_core::cost::{self, HOST_THRESHOLD, SERVER_THRESHOLD};
 use mcproster_core::env::Os;
 use mcproster_core::model::FindingKind;
 use mcproster_core::probe::{ProbeResult, ToolInfo};
-use mcproster_core::{inventory, Env, Rules};
+use mcproster_core::{hosts, inventory, Env};
 
 fn copy_fixture(home: &Path) {
     let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/home");
@@ -64,7 +64,7 @@ fn per_server_and_per_host_with_thresholds() {
     let tmp = tempfile::tempdir().unwrap();
     copy_fixture(tmp.path());
     let env = Env::fixture(tmp.path(), Os::Linux);
-    let inv = inventory::run(&Rules::embedded(), &env);
+    let inv = inventory::run(&hosts::embedded(), &env);
 
     let mut probes = BTreeMap::new();
     // playwright: declared by Amp, Gemini CLI and VS Code — heavy.
@@ -118,7 +118,10 @@ fn per_server_and_per_host_with_thresholds() {
     assert_eq!(cd.tokens, 21_700);
     assert_eq!(cd.probed, 2);
     assert_eq!(cd.unprobed, 2);
-    assert!(!report.hosts.iter().any(|h| h.host_name.contains("extensions")));
+    assert!(!report
+        .hosts
+        .iter()
+        .any(|h| h.host_name.contains("extensions")));
     assert!(cd.tokens > HOST_THRESHOLD);
     assert!(report
         .findings
@@ -152,7 +155,7 @@ fn package_cache_findings() {
     let tmp = tempfile::tempdir().unwrap();
     copy_fixture(tmp.path());
     let env = Env::fixture(tmp.path(), Os::Linux);
-    let inv = inventory::run(&Rules::embedded(), &env);
+    let inv = inventory::run(&hosts::embedded(), &env);
     let msgs: Vec<&str> = inv
         .findings
         .iter()
