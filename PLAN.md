@@ -75,7 +75,7 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 ## Etape 4. Paquets, depot, release 0.1.0
 
 - [x] `packaging/build.sh` repris ; icone originale (feuille d'appel, point orange), `.desktop`, metadonnees deb/rpm ; `.deb` 4,6 Mo, `.rpm` 5,0 Mo, AppImage 7,5 Mo construits dans le cloud, tests release verts — 2026-10-16
-- [ ] `.deb` installe et teste sur la machine d'Alexandre
+- [x] `.deb` installe et teste sur la machine d'Alexandre : « tout fonctionne » — 2026-10-16
 - [ ] Depot `blackberrylabs/mcproster` — push sur accord
 - [ ] Tag, release — sur accord
 

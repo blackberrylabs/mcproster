@@ -7,6 +7,15 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, .deb installe ; pret pour le depot
+
+- Alexandre : « Ok, tout fonctionne » — `.deb` installe, binaires et entree de menu en place.
+- Note de version prete : `00_cadrage/release_v0.1.0_notes.md`, a coller dans la release.
+- Reste, sur accord explicite : creation de `blackberrylabs/mcproster` (vide, sur GitHub),
+  remote SSH comme Cleanator, push des 8 commits ; puis tag `v0.1.0`, push du tag, release
+  avec les trois paquets et `SHA256SUMS` (fichiers dans `00_cadrage/dist/` ; `.rpm` et
+  AppImage a deposer depuis le cloud au moment de la release).
+
 ## 2026-10-16, etape 4 : paquets
 
 - Alexandre valide l'application telle quelle. Etape 3 close.
