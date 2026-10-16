@@ -7,6 +7,18 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, MCProster 0.1.0 publie
+
+- Tag `v0.1.0` sur `main`, release GitHub avec les quatre fichiers. Verifie depuis le cloud :
+  les quatre telecharges, `sha256sum -c` OK, `.deb` extrait → `mcproster 0.1.0`, inventaire
+  du faux home identique. `CLAUDE.md` (regle d'identite git) present sur le tag et sur `main`.
+- Reglages du depot : Issues et Pull requests seuls ouverts, Wikis / Discussions / Projects /
+  Sponsorships fermes, suppression automatique des branches fusionnees. *About* pose par
+  Alexandre (description, site = releases, topics).
+- Deux logiciels publies le meme jour sous Blackberrylabs (Cleanator 0.1.1 le matin,
+  MCProster 0.1.0 l'apres-midi). MCProster passe en veille active ; etape 5 (captures dans le
+  README, textes de presentation) sur decision d'Alexandre, pas le jour de la sortie.
+
 ## 2026-10-16, depot en ligne
 
 - Premier push refuse : « push declined due to email privacy restrictions ». Les 8 commits

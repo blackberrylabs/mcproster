@@ -77,7 +77,9 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 - [x] `packaging/build.sh` repris ; icone originale (feuille d'appel, point orange), `.desktop`, metadonnees deb/rpm ; `.deb` 4,6 Mo, `.rpm` 5,0 Mo, AppImage 7,5 Mo construits dans le cloud, tests release verts — 2026-10-16
 - [x] `.deb` installe et teste sur la machine d'Alexandre : « tout fonctionne » — 2026-10-16
 - [x] Depot `blackberrylabs/mcproster` cree par Alexandre, 8 commits pousses apres reecriture de l'identite (noreply) — 2026-10-16
-- [ ] Tag, release — sur accord
+- [x] Tag `v0.1.0` pousse, release publiee avec `.deb`, `.rpm`, AppImage et `SHA256SUMS` ; verifiee depuis le cloud (4 fichiers telecharges, empreintes OK, binaire 0.1.0 fonctionnel) — 2026-10-16
+
+**Etape 4 close le 2026-10-16. MCProster 0.1.0 est publie.**
 
 ## Etape 5. README et presentation
 
