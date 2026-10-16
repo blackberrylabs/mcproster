@@ -7,6 +7,21 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, depot en ligne
+
+- Premier push refuse : « push declined due to email privacy restrictions ». Les 8 commits
+  portaient l'identite globale du terminal (`Nimeria2026 <nimeria2026@outlook.fr>`) ;
+  Cleanator avait une config **locale** noreply, MCProster pas encore. Meme incident que
+  le 2026-10-16 sur Cleanator. Correction : config locale `Alexandre Do
+  <277202463+Nimeria2026@users.noreply.github.com>`, `git filter-branch --env-filter` sur
+  les 8 commits (dates et messages conserves), push OK. Regle ajoutee a `CLAUDE.md` :
+  **config locale avant le premier commit**, a verifier par `git log --format='%an <%ae>'`.
+- `blackberrylabs/mcproster` public, verifie depuis le cloud : README, LICENSE, regles,
+  fixtures, fichiers de pilotage ; aucune adresse personnelle. Les faux secrets des
+  fixtures (`sk-proj-abcdef…`) sont publics par construction : motif reconnaissable,
+  invalide.
+- Alexandre pose le *About* (description, site = releases, topics), Issues seules ouvertes.
+
 ## 2026-10-16, .deb installe ; pret pour le depot
 
 - Alexandre : « Ok, tout fonctionne » — `.deb` installe, binaires et entree de menu en place.

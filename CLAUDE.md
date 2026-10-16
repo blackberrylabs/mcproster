@@ -37,3 +37,10 @@ puis etape 0 (inventaire reel de sa machine, hors git, dans `00_cadrage/`).
 d'hotes, TOML, anglais) et `docs/hosts.md` ; `Cargo.toml` racine, `crates/core`,
 `crates/cli`, `crates/app` ; `locales/`, `assets/`, `packaging/` ; `README.md`, `LICENSE`,
 `CHANGELOG.md`, `CONTRIBUTING.md` (anglais) ; `00_cadrage/` hors git.
+
+## Identite git (incident du 2026-10-16, deux fois)
+
+Avant le **premier commit** d'un depot : `git config user.name "Alexandre Do"` et
+`git config user.email "277202463+Nimeria2026@users.noreply.github.com"` en config locale ;
+verifier par `git log --format='%an <%ae>'` avant tout push. La config globale du terminal
+d'Alexandre est une autre identite et GitHub refuse le push (email privacy).
