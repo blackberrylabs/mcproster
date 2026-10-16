@@ -16,3 +16,62 @@ mcproster-core = { path = "../core" }
 iced = { version = "=0.13.1", features = ["tokio"] }
 serde.workspace = true
 serde_json.workspace = true
+
+# ---------------------------------------------------------------- packaging
+# `packaging/build.sh` builds the workspace once, then runs `cargo deb --no-build` and
+# `cargo generate-rpm` from here, so one package ships both binaries.
+
+[package.metadata.deb]
+name = "mcproster"
+maintainer = "Alexandre Do <alexandre@blackberrylabs.dev>"
+copyright = "2026, Alexandre Do"
+license-file = ["../../LICENSE", "0"]
+extended-description = """\
+MCProster lists every MCP server declared on a Linux machine across the assistant hosts \
+that can run them (Claude Desktop, Claude Code, Cursor, VS Code, Codex, Gemini CLI, \
+OpenCode, Continue, Zed, Goose and more): where each is declared, the duplicates, the \
+dead entries, the secrets written in clear, the servers given access to the whole disk. \
+It reads the hosts' configuration files and never writes to them. Ships the desktop app \
+(mcproster-app) and the command line (mcproster)."""
+section = "devel"
+priority = "optional"
+# Window-system libraries are loaded at runtime (dlopen), so they are not seen by
+# dpkg-shlibdeps; Vulkan is only recommended: iced falls back to software rendering.
+depends = "$auto, libxkbcommon0, libwayland-client0 | libx11-6"
+recommends = "libvulkan1, mesa-vulkan-drivers"
+assets = [
+    ["target/release/mcproster-app", "usr/bin/", "755"],
+    ["target/release/mcproster", "usr/bin/", "755"],
+    ["../../assets/mcproster.desktop", "usr/share/applications/", "644"],
+    ["../../assets/icon.svg", "usr/share/icons/hicolor/scalable/apps/mcproster.svg", "644"],
+    ["../../assets/icon-16.png", "usr/share/icons/hicolor/16x16/apps/mcproster.png", "644"],
+    ["../../assets/icon-32.png", "usr/share/icons/hicolor/32x32/apps/mcproster.png", "644"],
+    ["../../assets/icon-48.png", "usr/share/icons/hicolor/48x48/apps/mcproster.png", "644"],
+    ["../../assets/icon-64.png", "usr/share/icons/hicolor/64x64/apps/mcproster.png", "644"],
+    ["../../assets/icon-128.png", "usr/share/icons/hicolor/128x128/apps/mcproster.png", "644"],
+    ["../../assets/icon-256.png", "usr/share/icons/hicolor/256x256/apps/mcproster.png", "644"],
+    ["../../assets/icon-512.png", "usr/share/icons/hicolor/512x512/apps/mcproster.png", "644"],
+    ["../../README.md", "usr/share/doc/mcproster/README.md", "644"],
+]
+
+[package.metadata.generate-rpm]
+name = "mcproster"
+summary = "Read-only inventory of the MCP servers declared on this machine"
+license = "MIT"
+url = "https://github.com/blackberrylabs/mcproster"
+requires = { libxkbcommon = "*" }
+assets = [
+    { source = "target/release/mcproster-app", dest = "/usr/bin/mcproster-app", mode = "755" },
+    { source = "target/release/mcproster", dest = "/usr/bin/mcproster", mode = "755" },
+    { source = "assets/mcproster.desktop", dest = "/usr/share/applications/mcproster.desktop", mode = "644" },
+    { source = "assets/icon.svg", dest = "/usr/share/icons/hicolor/scalable/apps/mcproster.svg", mode = "644" },
+    { source = "assets/icon-16.png", dest = "/usr/share/icons/hicolor/16x16/apps/mcproster.png", mode = "644" },
+    { source = "assets/icon-32.png", dest = "/usr/share/icons/hicolor/32x32/apps/mcproster.png", mode = "644" },
+    { source = "assets/icon-48.png", dest = "/usr/share/icons/hicolor/48x48/apps/mcproster.png", mode = "644" },
+    { source = "assets/icon-64.png", dest = "/usr/share/icons/hicolor/64x64/apps/mcproster.png", mode = "644" },
+    { source = "assets/icon-128.png", dest = "/usr/share/icons/hicolor/128x128/apps/mcproster.png", mode = "644" },
+    { source = "assets/icon-256.png", dest = "/usr/share/icons/hicolor/256x256/apps/mcproster.png", mode = "644" },
+    { source = "assets/icon-512.png", dest = "/usr/share/icons/hicolor/512x512/apps/mcproster.png", mode = "644" },
+    { source = "README.md", dest = "/usr/share/doc/mcproster/README.md", mode = "644", doc = true },
+    { source = "LICENSE", dest = "/usr/share/licenses/mcproster/LICENSE", mode = "644", doc = true },
+]

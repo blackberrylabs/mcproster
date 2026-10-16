@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=MCProster
+GenericName=MCP server inventory
+GenericName[fr]=Inventaire des serveurs MCP
+Comment=See every MCP server declared on this machine, across Claude Desktop, Claude Code, Cursor, VS Code, Codex and the others — duplicates, dead entries, secrets in clear. Reads, never writes.
+Comment[fr]=Voir tous les serveurs MCP déclarés sur cette machine — Claude Desktop, Claude Code, Cursor, VS Code, Codex et les autres — doublons, entrées mortes, secrets en clair. Lit, n'écrit jamais.
+Exec=mcproster-app
+Icon=mcproster
+Terminal=false
+Categories=Development;Utility;
+Keywords=mcp;model context protocol;claude;cursor;codex;inventory;servers;
+StartupWMClass=mcproster-app

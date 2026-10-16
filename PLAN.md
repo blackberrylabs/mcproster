@@ -68,15 +68,19 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 - [x] Maquette discutee avec Alexandre (blocs → table dense + detail + filtres, « mets-toi dans la peau d'un developpeur ») — 2026-10-16
 - [x] Table serveurs × hotes (colonnes par hote jusqu'a 6 hotes configures, sinon une colonne « declared in »), filtre texte, menu d'hote, bascules « constats seulement » / « voir desactives et anciens » ; detail d'un serveur (declarations, fichier:ligne, Open / Copy path / Copy command, variables masquees) ; panneau des constats avec l'action possible affichee (jamais executee), clic → selection ; bouton Test avec confirmation avant le premier (« ne plus demander » retenu), serveurs distants non sondes — 2026-10-16
 - [x] EN · FR (**anglais par defaut** quelle que soit la langue systeme), clair/sombre, preferences dans `~/.config/mcproster/settings.json` — 2026-10-16
-- [ ] Validation visuelle par Alexandre (`00_cadrage/bin/mcproster-app`) ; captures Xvfb relues par Claude sur le faux home a 19 et a 6 hotes
+- [x] Validation visuelle par Alexandre : « je garderai tel quel, c'est tres bien » — 2026-10-16
+
+**Etape 3 close le 2026-10-16.**
 
 ## Etape 4. Paquets, depot, release 0.1.0
 
-- [ ] `packaging/build.sh` repris ; `.deb` installe et teste
+- [x] `packaging/build.sh` repris ; icone originale (feuille d'appel, point orange), `.desktop`, metadonnees deb/rpm ; `.deb` 4,6 Mo, `.rpm` 5,0 Mo, AppImage 7,5 Mo construits dans le cloud, tests release verts — 2026-10-16
+- [ ] `.deb` installe et teste sur la machine d'Alexandre
 - [ ] Depot `blackberrylabs/mcproster` — push sur accord
 - [ ] Tag, release — sur accord
 
 ## Etape 5. README et presentation
 
-- [ ] README avec captures, comparatif verifie, CONTRIBUTING, CHANGELOG
+- [x] README complet (promesses, hotes, install, CLI, app, lecture des constats), CHANGELOG 0.1.0, CONTRIBUTING (ajouter un hote = un TOML avec sources) — 2026-10-16
+- [ ] Captures d'ecran dans le README (apres installation chez Alexandre)
 - [ ] Textes de presentation — plus tard, sur decision d'Alexandre

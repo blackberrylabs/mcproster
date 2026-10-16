@@ -7,6 +7,21 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, etape 4 : paquets
+
+- Alexandre valide l'application telle quelle. Etape 3 close.
+- Icone originale (une feuille d'appel : trois serveurs coches, le point orange sur celui
+  declare deux fois), rendue en PNG par cairosvg (pas de rsvg dans le cloud). Entree
+  `.desktop` EN/FR, categories Development;Utility.
+- `packaging/build.sh` repris de Cleanator par substitution ; metadonnees `cargo-deb` et
+  `generate-rpm` dans `crates/app/Cargo.toml` (un paquet, deux binaires :
+  `mcproster-app` et `mcproster`). Premier echec : `LICENSE` n'existait que sur la machine
+  d'Alexandre, pas dans l'arbre cloud — recree a l'identique.
+- Paquets 0.1.0 construits : `.deb` 4,6 Mo (depend libc6 ≥ 2.39, libxkbcommon0,
+  wayland | x11), `.rpm` 5,0 Mo, AppImage 7,5 Mo ; SHA256SUMS de la version seule.
+- README complet, CHANGELOG 0.1.0, CONTRIBUTING. Le `.deb` est depose dans
+  `00_cadrage/dist/` pour l'installation de test.
+
 ## 2026-10-16, etape 3 : l'application
 
 - Maquette proposee en blocs ; Alexandre : « anglais par defaut » et « mets-toi dans la peau
