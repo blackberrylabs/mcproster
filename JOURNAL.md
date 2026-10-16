@@ -7,6 +7,42 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, etape 3 : l'application
+
+- Maquette proposee en blocs ; Alexandre : « anglais par defaut » et « mets-toi dans la peau
+  d'un developpeur ». Reponse honnete : les blocs ne tiennent pas a trente serveurs ; table
+  dense + detail + filtres, boutons de copie (rien n'est selectionnable dans iced), menu
+  d'hote. Valide : « Part sur la table, plus details, plus filtres. »
+- `crates/app` (iced 0.13.1, repris de Cleanator sans fusion : settings, i18n par
+  `locales/*.json`, presse-papiers, `xdg-open`). Anglais au demarrage quelle que soit la
+  langue systeme — difference voulue avec Cleanator.
+- Captures sous Xvfb sur le faux home : a 19 hotes configures, les puces debordaient et
+  19 colonnes etaient illisibles → menu deroulant et colonnes par hote seulement jusqu'a 6
+  (au-dela, une colonne « declared in »). Un fichier partage affichait l'identifiant
+  `vscode` au lieu du nom → corrige dans le coeur (test ajoute). Chemins absolus
+  raccourcis en `~` dans la table.
+- Le clic sur une ligne et le detail n'ont pas pu etre captures (pas de `xdotool` dans le
+  cloud) : a valider visuellement par Alexandre.
+- Alexandre : « essaye de donner le meme visuel que Cleanator ». Rhabillage avec les briques
+  de Cleanator : cartes KPI (Servers / Hosts with configuration / Findings / Secrets in
+  clear, pastille verte ou orange), panneau a titre et sous-titre, pastilles de constats,
+  palette verte `008300` / orange `eb6834` / gris `7a869a`, monospace pour identites,
+  chemins et commandes, pied statut + EN·FR + theme, page `padding 16 / spacing 14`.
+  Captures clair et sombre relues ; la barre de filtres debordait → champ elastique.
+- Binaire `mcproster-app` (14 Mo) depose hors git dans `00_cadrage/bin/`.
+
+## 2026-10-16, etape 2 close : sondes reelles
+
+- `probe apipriceindex` : OK en 297 ms, protocole 2025-06-18, 3 outils (`search_models`,
+  `get_price`, `estimate_cost`). `probe eliot` : OK en 2 ms, Eliot 0.1.0, 22 outils.
+- Defaut d'affichage trouve par le passage reel : Apipriceindex renvoie une version
+  **vide** dans `serverInfo`, affichee comme presente (« apipriceindex , protocol »).
+  Corrige : vide = absente ; test ajoute (faux serveur avec `FAKE_VERSION=`).
+- Retour pour Apipriceindex (pas MCProster) : `apipriceindex-mcp` ne declare pas sa
+  version dans `initialize` — parametre `version` du `MCPServer` (mcp>=2). A noter dans
+  ce projet-la.
+- Etape 2 close. Prochaine : etape 3, application iced — maquette a valider avant le code.
+
 ## 2026-10-16, premier passage reel et sonde
 
 - `mcproster list|findings|files` sur la vraie machine : 6 hotes avec fichier, 3

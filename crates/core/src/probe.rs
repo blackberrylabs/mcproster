@@ -163,10 +163,14 @@ pub fn probe_stdio(
             .pointer("/serverInfo/name")
             .and_then(Value::as_str)
             .map(str::to_string);
+        // An empty name or version is reported as absent, not as an empty string.
         result.server_version = r
             .pointer("/serverInfo/version")
             .and_then(Value::as_str)
+            .map(str::trim)
+            .filter(|v| !v.is_empty())
             .map(str::to_string);
+        result.server_name = result.server_name.take().filter(|n| !n.trim().is_empty());
         send(
             stdin,
             &json!({"jsonrpc": "2.0", "method": "notifications/initialized"}),

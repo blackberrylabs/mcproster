@@ -88,3 +88,20 @@ fn env_references_are_expanded_for_the_child_only() {
     assert!(r.ok, "{r:#?}");
     assert!(!serde_json::to_string(&r).unwrap().contains("secret-value"));
 }
+
+#[test]
+fn an_empty_version_is_absent_not_empty() {
+    let mut env = BTreeMap::new();
+    env.insert("FAKE_VERSION".to_string(), "".to_string());
+    let r = probe_stdio(
+        "python3",
+        &[server()],
+        &env,
+        None,
+        &BTreeMap::new(),
+        Duration::from_secs(10),
+    );
+    assert!(r.ok, "{r:#?}");
+    assert_eq!(r.server_version, None);
+    assert_eq!(r.server_name.as_deref(), Some("fake-mcp"));
+}

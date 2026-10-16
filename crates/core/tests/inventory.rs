@@ -73,6 +73,7 @@ fn a_shared_mcp_json_is_one_declaration_for_two_hosts() {
         shared.hosts,
         vec!["claude-code".to_string(), "vscode".to_string()]
     );
+    assert_eq!(shared.host_names[1], "Visual Studio Code (Copilot)");
     assert!(shared.file.ends_with("projects/alpha/.mcp.json"));
     assert!(shared.project.as_ref().unwrap().ends_with("projects/alpha"));
     // Not counted as a duplicate.

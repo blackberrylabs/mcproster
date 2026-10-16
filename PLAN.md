@@ -58,13 +58,17 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 - [x] `mcproster hosts | list | findings | files`, `--json`, `--home <dir>`, `--root <dir>` (sonde : etape suivante) — 2026-10-16
 - [x] Sonde stdio : `mcproster probe <serveur>`, `initialize` + `tools/list`, delai 10 s (`--timeout`), aucun outil appele, processus arrete ; resultats dates dans `~/.config/mcproster/probes.json` (noms, versions, outils — jamais une valeur de config), repris dans `list` — 2026-10-16
 - [x] Sonde HTTP/SSE : **non, en v0** — R2 « aucune sortie reseau » tranche ; `probe` repond « remote server, not probed ». A revoir si Alexandre le souhaite — 2026-10-16
-- [x] Premier passage sur la machine d'Alexandre : 6 hotes avec fichier, 3 declarations, le doublon volontaire ; `files` corrige (metadonnees ≠ declarations). Sonde reelle a lancer sur `apipriceindex` et `eliot` — 2026-10-16
+- [x] Premier passage sur la machine d'Alexandre : 6 hotes avec fichier, 3 declarations, le doublon volontaire ; `files` corrige (metadonnees ≠ declarations). Sonde reelle : Apipriceindex OK (3 outils, 297 ms, version absente dans
+      `serverInfo` → retour pour le projet Apipriceindex), Eliot OK (22 outils, 2 ms, 0.1.0) — 2026-10-16
+
+**Etape 2 close le 2026-10-16** (reste pour v0.2 : `remove_hint` dans `findings`).
 
 ## Etape 3. Application iced
 
-- [ ] Table serveurs × hotes, panneau de constats, detail d'un serveur, bouton Tester (avec l'avertissement avant le premier)
-- [ ] EN · FR, clair/sombre, preferences retenues (repris de Cleanator)
-- [ ] Validation visuelle par Alexandre
+- [x] Maquette discutee avec Alexandre (blocs → table dense + detail + filtres, « mets-toi dans la peau d'un developpeur ») — 2026-10-16
+- [x] Table serveurs × hotes (colonnes par hote jusqu'a 6 hotes configures, sinon une colonne « declared in »), filtre texte, menu d'hote, bascules « constats seulement » / « voir desactives et anciens » ; detail d'un serveur (declarations, fichier:ligne, Open / Copy path / Copy command, variables masquees) ; panneau des constats avec l'action possible affichee (jamais executee), clic → selection ; bouton Test avec confirmation avant le premier (« ne plus demander » retenu), serveurs distants non sondes — 2026-10-16
+- [x] EN · FR (**anglais par defaut** quelle que soit la langue systeme), clair/sombre, preferences dans `~/.config/mcproster/settings.json` — 2026-10-16
+- [ ] Validation visuelle par Alexandre (`00_cadrage/bin/mcproster-app`) ; captures Xvfb relues par Claude sur le faux home a 19 et a 6 hotes
 
 ## Etape 4. Paquets, depot, release 0.1.0
 

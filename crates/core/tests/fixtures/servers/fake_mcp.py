@@ -19,7 +19,7 @@ for line in sys.stdin:
         out = {"jsonrpc": "2.0", "id": rid, "result": {
             "protocolVersion": msg["params"].get("protocolVersion"),
             "capabilities": {"tools": {}},
-            "serverInfo": {"name": "fake-mcp", "version": "9.9.9"}}}
+            "serverInfo": {"name": "fake-mcp", "version": os.environ.get("FAKE_VERSION", "9.9.9")}}}
     elif method == "tools/list":
         out = {"jsonrpc": "2.0", "id": rid, "result": {"tools": [
             {"name": "ping", "description": "Answers pong.\nSecond line ignored."},

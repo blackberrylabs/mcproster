@@ -118,6 +118,15 @@ pub fn run(rules: &Rules, env: &Env) -> Inventory {
         });
     }
 
+    // Hosts named through `shared_with` carry their id: give them their display name.
+    for d in &mut declarations {
+        for (i, hid) in d.hosts.clone().iter().enumerate() {
+            if let Some(h) = rules.host(hid) {
+                d.host_names[i] = h.name.clone();
+            }
+        }
+    }
+
     // Registry / settings metadata: match on a path component equal to the id.
     for d in &mut declarations {
         for (id, m) in &meta {
