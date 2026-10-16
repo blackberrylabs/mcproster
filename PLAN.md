@@ -109,4 +109,6 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 - [x] Coeur commun extrait dans `blackberrylabs/hostrules` v0.1.0 ; MCProster migre, sorties identiques — 2026-10-16
 - [x] Passage reel sur la machine d'Alexandre : `list`, `findings`, `context` identiques au 0.2.0, hint `claude mcp remove` en place — 2026-10-16
 - [x] Commit 11 (6e787ff) — 2026-10-16
-- [ ] Paquets 0.2.1, release — sur accord ; pas urgent (rien ne change pour l'utilisateur), Permitt d'abord
+- [x] Interface depuis `bbl-ui` 0.1.0, zero pixel de difference (commit 13) — 2026-10-16
+- [x] `mcproster report` (`bbl-report/1`), `--select` dans l'app, mapping des gravites dans le CHANGELOG — 2026-10-16
+- [ ] Paquets 0.2.1, release — sur accord ; quand la tour lira les rapports

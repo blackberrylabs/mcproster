@@ -1,4 +1,4 @@
-//! MCProster's host rules: the common schema comes from `hostrules`; this module adds the
+//! MCProster's host rules: the common schema comes from `bbl-hostrules`; this module adds the
 //! fields an MCP inventory needs in every location ([`McpLocation`]), embeds the rule files
 //! shipped in `hosts/*.toml`, and validates what is specific to MCP.
 
@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-pub use hostrules::rules::{
+pub use bbl_hostrules::rules::{
     Format, NotRead, OneOrMany, PathSpec, RuleError, Scope, Source, SourceKind, Status,
 };
 
@@ -53,7 +53,7 @@ impl McpLocation {
     }
 }
 
-impl hostrules::Extension for McpLocation {
+impl bbl_hostrules::Extension for McpLocation {
     fn validate(loc: &Location) -> Result<(), String> {
         if loc.ext.servers_key.trim().is_empty() && loc.role.as_deref() != Some("settings") {
             return Err("empty servers_key".into());
@@ -65,9 +65,9 @@ impl hostrules::Extension for McpLocation {
     }
 }
 
-pub type Location = hostrules::Location<McpLocation>;
-pub type HostRule = hostrules::HostRule<McpLocation>;
-pub type Rules = hostrules::Rules<McpLocation>;
+pub type Location = bbl_hostrules::Location<McpLocation>;
+pub type HostRule = bbl_hostrules::HostRule<McpLocation>;
+pub type Rules = bbl_hostrules::Rules<McpLocation>;
 
 /// The rule files shipped inside the binary, so the tool works without a `hosts/`
 /// directory next to it. Kept in sync with the repository by `include_str!`.

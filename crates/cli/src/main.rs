@@ -65,6 +65,9 @@ enum Command {
     Findings,
     /// The files that were looked at.
     Files,
+    /// The inventory as a `bbl-report/1` document for the Blackberrylabs control tower
+    /// (always JSON).
+    Report,
     /// Start one declared server as its host would, ask it `initialize` and `tools/list`, stop it.
     /// On demand only; nothing else is called; remote servers are not contacted.
     Probe {
@@ -101,7 +104,16 @@ fn main() -> Result<()> {
         None => Env::current(),
     }
     .with_roots(cli.root.clone());
+    let started = std::time::Instant::now();
     let inv = inventory::run(&rules, &env);
+    let duration_ms = started.elapsed().as_millis() as u64;
+    if matches!(cli.command, Command::Report) {
+        let probes = probe::load_results(&env.home);
+        let report = mcproster_core::report::build(&inv, &rules, &env, &probes, duration_ms);
+        let mut o = std::io::stdout().lock();
+        o.write_all(report.to_json().as_bytes())?;
+        return Ok(());
+    }
     if cli.json {
         out!("{}", serde_json::to_string_pretty(&inv)?);
         return Ok(());
@@ -118,6 +130,7 @@ fn main() -> Result<()> {
         Command::List => list(&inv, &env),
         Command::Findings => findings(&rules, &inv, &env),
         Command::Files => files(&inv, &env),
+        Command::Report => unreachable!(),
     }
     Ok(())
 }

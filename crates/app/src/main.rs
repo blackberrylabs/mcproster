@@ -36,6 +36,20 @@ struct Extra {
     ask_before_probe: Option<bool>,
 }
 
+/// The `--select` argument, if any.
+fn requested_selection() -> Option<String> {
+    let mut args = std::env::args().skip(1);
+    while let Some(a) = args.next() {
+        if a == "--select" {
+            return args.next();
+        }
+        if let Some(v) = a.strip_prefix("--select=") {
+            return Some(v.to_string());
+        }
+    }
+    None
+}
+
 fn main() -> iced::Result {
     iced::application(App::title, App::update, App::view)
         .theme(App::theme)
@@ -179,6 +193,12 @@ impl App {
                 self.inventory = Some(inv);
                 self.loading = false;
                 self.error = None;
+                // `--select <server identity>` (the control tower) preselects a server.
+                if self.selected.is_none() {
+                    if let (Some(want), Some(inv)) = (requested_selection(), &self.inventory) {
+                        self.selected = inv.servers.iter().position(|s| s.identity == want);
+                    }
+                }
                 if let Some(s) = self.selected {
                     if s >= self
                         .inventory

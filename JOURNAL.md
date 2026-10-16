@@ -7,6 +7,24 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, tard — module de la tour de controle
+
+- La tour Blackberrylabs est cadree et son contrat publie (`bbl-report` 0.1.0). MCProster
+  le parle : `mcproster report` (toujours JSON) et `mcproster-app --select <serveur>`
+  (l'identite telle que `list` la montre).
+- Rien d'inedit : les quatre chiffres des cartes (sans les serveurs desactives, comme la
+  carte), les constats — desactives compris, en information —, les fichiers declarants, les
+  memes actions que `findings` (commande de l'hote, ouvrir le fichier, indication). Secrets
+  masques comme partout ; le chemin du home sort des titres (`~`).
+- Mapping dans le CHANGELOG : secret en clair = agir maintenant ; acces large / confirmations
+  sautees = a regarder ; doublon, versions, commande absente, cout en contexte = bon a
+  savoir ; illisible, desactive, pas en cache = information.
+- Test de conformite sur la maison factice (9 tests d'inventaire) ; `--select
+  "@playwright/mcp"` verifie a l'ecran dans le cloud. `--json` et interface inchanges.
+  Entre dans 0.2.1, toujours non publie.
+
+---
+
 ## 2026-10-16, nuit — un frere
 
 - Permitt 0.1.0 publie le soir meme, sur la meme fondation (hostrules). La table des hotes de

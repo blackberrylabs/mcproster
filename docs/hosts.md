@@ -12,7 +12,7 @@ No rule may rest on memory.
 ## Rule schema
 
 The common part of the schema (identity, locations, paths per OS, sources, validation)
-comes from the shared crate [`hostrules`](https://github.com/blackberrylabs/hostrules);
+comes from the shared crate [`bbl-hostrules`](https://github.com/blackberrylabs/bbl-hostrules);
 MCProster adds the fields an MCP inventory needs (`servers_key`, `entry`, `name_key`,
 `inputs_key`, `map`, `command_is_array`).
 

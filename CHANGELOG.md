@@ -5,6 +5,25 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [0.2.1] — unreleased
 
+### Added
+
+- `mcproster report`: the inventory as a [`bbl-report/1`](https://github.com/blackberrylabs/bbl-report)
+  document for the Blackberrylabs control tower (always JSON). Nothing in it is new: the four
+  figures of the app's cards, the findings (disabled servers included, as information), the
+  declaring files and the same actions the CLI and the app already show, secrets masked as
+  everywhere else. MCProster's findings map onto the four common severities as follows — the
+  tower never reinterprets:
+
+  | MCProster | Common severity |
+  |---|---|
+  | secret in clear | 1 · act now |
+  | wide access, confirmations skipped | 2 · review |
+  | declared twice, versions differ, command missing, context cost | 3 · good to know |
+  | unreadable, disabled, not in cache | 4 · information |
+
+- `mcproster-app --select <server>` opens the app on that server (its identity as `list`
+  shows it), the way the tower does.
+
 ### Changed
 
 - The interface building blocks, palette, preferences and translated strings now come from
@@ -12,7 +31,8 @@ versions follow [Semantic Versioning](https://semver.org/).
   Blackberrylabs tools. Nothing visible changes.
 - The common ground of the host rules (schema, loading, validation, path resolution,
   readers, secret masking) moved to the shared crate
-  [`hostrules`](https://github.com/blackberrylabs/hostrules), so the next Blackberrylabs
+  [`bbl-hostrules`](https://github.com/blackberrylabs/bbl-hostrules) (named `hostrules`
+  until its 0.3.0), so the next Blackberrylabs
   tool reads the same files the same way. No change to what MCProster shows; the only
   visible difference is in `mcproster --json hosts`, where `remove_hint` / `list_hint`
   became a `hints` table (`hints.remove`, `hints.list`).

@@ -110,6 +110,7 @@ mcproster hosts             # what MCProster knows about each host, and how
 mcproster probe <server>    # start it as its host would, initialize + tools/list, stop it
 mcproster probe --all       # every enabled stdio server, after one confirmation listing the commands
 mcproster context           # ~tokens of tool definitions per server and per host
+mcproster report            # the inventory as a bbl-report/1 document (Blackberrylabs tower)
 mcproster --json list       # for scripts
 mcproster --home /mnt/old   # inventory another home (a backup, a test fixture)
 ```
@@ -146,8 +147,10 @@ could take. English by default, French on demand; light and dark.
 A Rust workspace: `crates/core` (rules, inventory, probe, cost — no UI, no network),
 `crates/cli`, `crates/app` (iced). Host rules in `hosts/*.toml`, embedded in the binaries.
 The rule schema, path resolution, file readers and secret masking come from
-[`hostrules`](https://github.com/blackberrylabs/hostrules), the crate shared by the
-Blackberrylabs tools.
+[`bbl-hostrules`](https://github.com/blackberrylabs/bbl-hostrules), the crate shared by the
+Blackberrylabs tools; the interface from [`bbl-ui`](https://github.com/blackberrylabs/bbl-ui);
+`mcproster report` speaks [`bbl-report`](https://github.com/blackberrylabs/bbl-report), the
+contract of the Blackberrylabs control tower.
 `#![forbid(unsafe_code)]` everywhere. The design brief, plan and journal are kept in French
 at the root (`BRIEF.md`, `PLAN.md`, `JOURNAL.md`); code, comments and documentation are in
 English.
