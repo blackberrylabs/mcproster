@@ -3,6 +3,42 @@
 All notable changes to MCProster. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] — 2026-10-16
+
+What your MCP servers cost in the model's context — the question the community was
+answering with logging proxies.
+
+### Added
+
+- **Context cost.** The probe now keeps the size of every tool definition returned by
+  `tools/list` and estimates its tokens (characters / 4, shown with "~"): per tool, per
+  server (with the three heaviest tools) and per host (sum of its enabled, probed servers;
+  "at least" when some are not probed; Claude Code marked as an upper bound since it can
+  load tools on demand). A `context-cost` finding above ~5 000 tokens for one server or
+  ~20 000 for one host, with the action to take. New `mcproster context` command; `~tokens`
+  column and "Context cost per host" block in the app. Method, thresholds and limits in
+  `docs/context-cost.md`.
+- **Test all.** `mcproster probe --all` (and a *Test all* button) probes every enabled stdio
+  server, one launch per distinct command, after **one confirmation that lists the
+  commands** (`--yes` to skip); results are then summarised per host.
+- **Package cache.** `package-not-cached` (information) when an `npx` / `uvx` server's
+  package is not in the local cache: it will work, but will download first.
+- **Actions in the CLI.** `mcproster findings` now prints, under each finding, what you
+  could do — the host's own command (`claude mcp remove …`, `codex mcp remove …`), its
+  settings page, or the file to open — as the app already did.
+
+### Changed
+
+- Probe results no longer keep tool descriptions on disk: `probes.json` holds names,
+  versions, sizes and tokens only. Descriptions are shown live during a probe.
+- Failed probes are counted apart from servers not probed yet.
+
+### Known limitations
+
+- Token figures are estimates (±20 %); each host serialises tool definitions its own way.
+- Only tools are weighed, not resources or prompts.
+- Kilo Code is still not read (configuration location changed in 2026, not yet stable).
+
 ## [0.1.0] — 2026-10-16
 
 First release. A read-only inventory of the MCP servers declared on a Linux machine, across
@@ -58,4 +94,5 @@ the assistant hosts that can run them. **It never writes to a configuration file
   reported, a package that would have to be downloaded is not.
 - Kilo Code, JetBrains, Warp, 5ire, Trae are not read yet.
 
+[0.2.0]: https://github.com/blackberrylabs/mcproster/releases/tag/v0.2.0
 [0.1.0]: https://github.com/blackberrylabs/mcproster/releases/tag/v0.1.0

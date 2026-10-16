@@ -6,7 +6,7 @@
 mod i18n;
 mod settings;
 
-use std::collections::{BTreeMap, BTreeSet, HashSet};
+use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
@@ -17,6 +17,8 @@ use iced::widget::{
 };
 use iced::{Background, Border, Color, Element, Length, Task, Theme};
 
+use mcproster_core::actions::{self, Action};
+use mcproster_core::cost;
 use mcproster_core::hosts::SourceKind;
 use mcproster_core::model::{Declaration, FindingKind, Transport};
 use mcproster_core::probe::{self, ProbeResult};
@@ -47,6 +49,7 @@ enum Message {
     Copy(String),
     OpenFile(PathBuf),
     ProbeRequest(usize),
+    ProbeAllRequest,
     ProbeAskToggle(bool),
     ProbeConfirm,
     ProbeCancel,
@@ -74,7 +77,8 @@ struct App {
     probes: BTreeMap<String, ProbeResult>,
     probing: Option<String>,
     ask_before_probe: bool,
-    pending_probe: Option<usize>,
+    pending_probe: Option<Vec<usize>>,
+    probe_queue: Vec<usize>,
     dont_ask: bool,
     open_tools: HashSet<String>,
     status: String,
@@ -108,6 +112,7 @@ impl App {
             probing: None,
             ask_before_probe: settings.asks_before_probe(),
             pending_probe: None,
+            probe_queue: Vec::new(),
             dont_ask: false,
             open_tools: HashSet::new(),
             status,
@@ -229,10 +234,24 @@ impl App {
             }
             Message::ProbeRequest(si) => {
                 if self.ask_before_probe {
-                    self.pending_probe = Some(si);
+                    self.pending_probe = Some(vec![si]);
                     self.dont_ask = false;
                 } else {
-                    return self.start_probe(si);
+                    self.probe_queue = vec![si];
+                    return self.next_probe();
+                }
+            }
+            Message::ProbeAllRequest => {
+                let all = self.probeable_servers();
+                if all.is_empty() {
+                    return Task::none();
+                }
+                if self.ask_before_probe {
+                    self.pending_probe = Some(all);
+                    self.dont_ask = false;
+                } else {
+                    self.probe_queue = all;
+                    return self.next_probe();
                 }
             }
             Message::ProbeAskToggle(b) => self.dont_ask = b,
@@ -241,8 +260,9 @@ impl App {
                     self.ask_before_probe = false;
                     self.remember();
                 }
-                if let Some(si) = self.pending_probe.take() {
-                    return self.start_probe(si);
+                if let Some(list) = self.pending_probe.take() {
+                    self.probe_queue = list;
+                    return self.next_probe();
                 }
             }
             Message::ProbeCancel => self.pending_probe = None,
@@ -250,6 +270,7 @@ impl App {
                 self.probing = None;
                 self.probes.insert(identity, (*result).clone());
                 let _ = probe::save_results(&self.env.home, &self.probes);
+                return self.next_probe();
             }
             Message::ToggleTools(id) => {
                 if !self.open_tools.remove(&id) {
@@ -258,6 +279,39 @@ impl App {
             }
         }
         Task::none()
+    }
+
+    fn fg_color(&self) -> Color {
+        if self.dark {
+            Color::from_rgb(0.92, 0.92, 0.94)
+        } else {
+            Color::from_rgb(0.1, 0.1, 0.12)
+        }
+    }
+
+    /// Servers with at least one enabled stdio declaration, in table order.
+    fn probeable_servers(&self) -> Vec<usize> {
+        let Some(inv) = &self.inventory else {
+            return Vec::new();
+        };
+        (0..inv.servers.len())
+            .filter(|&si| {
+                inv.servers[si]
+                    .declarations
+                    .iter()
+                    .map(|&i| &inv.declarations[i])
+                    .any(|d| d.enabled && d.transport == Transport::Stdio)
+            })
+            .collect()
+    }
+
+    /// Start the next queued probe, one at a time.
+    fn next_probe(&mut self) -> Task<Message> {
+        if self.probe_queue.is_empty() {
+            return Task::none();
+        }
+        let si = self.probe_queue.remove(0);
+        self.start_probe(si)
     }
 
     /// The first stdio declaration of a server gives the launch; the probe runs off-thread.
@@ -317,6 +371,8 @@ impl App {
                     server_version: None,
                     protocol_version: None,
                     tools: vec![],
+                    schema_bytes: 0,
+                    estimated_tokens: 0,
                     duration_ms: 0,
                     stderr: vec![],
                 }),
@@ -385,6 +441,7 @@ impl App {
                 .iter()
                 .filter(|f| f.kind != FindingKind::Disabled)
                 .count()
+                + cost::report(i, &self.probes).findings.len()
         });
         let secrets = inv.map(|i| i.count(FindingKind::PlainSecret));
         let findings_dot = findings.map(|f| {
@@ -502,6 +559,13 @@ impl App {
                 .on_toggle(Message::ToggleShowOff)
                 .size(16)
                 .text_size(12),
+            if self.probing.is_some() {
+                button(text(s.t("probe.testing", &[])).size(12)).style(button::primary)
+            } else {
+                button(text(s.t("probe.test_all", &[])).size(12))
+                    .style(button::primary)
+                    .on_press(Message::ProbeAllRequest)
+            },
             if self.loading {
                 button(text(s.t("header.scanning", &[])).size(12)).style(button::secondary)
             } else {
@@ -604,6 +668,7 @@ impl App {
             header_cell(s.t("table.server", &[]), Length::FillPortion(5)),
             header_cell(s.t("table.transport", &[]), Length::Fixed(64.0)),
             header_cell(s.t("table.version", &[]), Length::Fixed(110.0)),
+            header_cell(s.t("table.tokens", &[]), Length::Fixed(70.0)),
         ]
         .spacing(6)
         .padding([4, 6]);
@@ -645,6 +710,18 @@ impl App {
                 server.versions.join(" / ")
             };
             let all_off = decls.iter().all(|d| !d.enabled);
+            let (tokens_cell, tokens_color) = match self.probes.get(&server.identity) {
+                Some(r) if r.ok => (
+                    format!("~{}", cost::thousands(r.estimated_tokens)),
+                    if r.estimated_tokens > cost::SERVER_THRESHOLD {
+                        alert(self.dark)
+                    } else {
+                        self.fg_color()
+                    },
+                ),
+                Some(_) => ("✗".to_string(), alert(self.dark)),
+                None => (String::new(), self.fg_color()),
+            };
             let mut r = row![
                 dot,
                 text(
@@ -662,6 +739,11 @@ impl App {
                 }),
                 text(transport).size(12).width(Length::Fixed(64.0)),
                 text(versions).size(12).width(Length::Fixed(110.0)),
+                text(tokens_cell)
+                    .size(12)
+                    .font(iced::Font::MONOSPACE)
+                    .color(tokens_color)
+                    .width(Length::Fixed(70.0)),
             ]
             .spacing(6)
             .padding([5, 6])
@@ -743,8 +825,8 @@ impl App {
                 .style(text::secondary),
         ]
         .spacing(2);
-        let detail: Element<'_, Message> = match (self.pending_probe, self.selected) {
-            (Some(si), _) => self.view_probe_confirm(inv, si),
+        let detail: Element<'_, Message> = match (&self.pending_probe, self.selected) {
+            (Some(list), _) => self.view_probe_confirm(inv, list),
             (None, Some(si)) if si < inv.servers.len() => self.view_detail(inv, si),
             _ => container(
                 text(s.t("detail.pick", &[]))
@@ -892,17 +974,29 @@ impl App {
         } else {
             let result = self.probes.get(&server.identity);
             let line: Element<'_, Message> = match result {
-                Some(r) if r.ok => text(s.t(
-                    "probe.ok",
-                    &[
-                        ("date", r.at.get(..10).unwrap_or("")),
-                        ("name", r.server_name.as_deref().unwrap_or("server")),
-                        ("ms", &r.duration_ms.to_string()),
-                        ("proto", r.protocol_version.as_deref().unwrap_or("?")),
-                        ("n", &r.tools.len().to_string()),
-                    ],
+                Some(r) if r.ok => text(format!(
+                    "{} — {}",
+                    s.t(
+                        "probe.ok",
+                        &[
+                            ("date", r.at.get(..10).unwrap_or("")),
+                            ("name", r.server_name.as_deref().unwrap_or("server")),
+                            ("ms", &r.duration_ms.to_string()),
+                            ("proto", r.protocol_version.as_deref().unwrap_or("?")),
+                            ("n", &r.tools.len().to_string()),
+                        ],
+                    ),
+                    s.t(
+                        "probe.tokens",
+                        &[("n", &cost::thousands(r.estimated_tokens))]
+                    )
                 ))
                 .size(12)
+                .color(if r.estimated_tokens > cost::SERVER_THRESHOLD {
+                    alert(self.dark)
+                } else {
+                    self.fg_color()
+                })
                 .into(),
                 Some(r) => text(s.t(
                     "probe.failed",
@@ -950,6 +1044,10 @@ impl App {
                         tools = tools.push(
                             row![
                                 text(t.name.clone()).size(12).width(Length::Fixed(200.0)),
+                                text(format!("~{}", cost::thousands(t.tokens)))
+                                    .size(11)
+                                    .font(iced::Font::MONOSPACE)
+                                    .width(Length::Fixed(70.0)),
                                 text(t.description.clone().unwrap_or_default())
                                     .size(11)
                                     .style(text::secondary),
@@ -966,38 +1064,56 @@ impl App {
         container(col).padding([4, 0]).width(Length::Fill).into()
     }
 
-    fn view_probe_confirm(&self, inv: &Inventory, si: usize) -> Element<'_, Message> {
+    fn view_probe_confirm(&self, inv: &Inventory, list: &[usize]) -> Element<'_, Message> {
         let s = &self.strings;
-        let server = &inv.servers[si];
-        let d = server
-            .declarations
-            .iter()
-            .map(|&i| &inv.declarations[i])
-            .find(|d| d.transport == Transport::Stdio);
-        let (host, command) = match d {
-            Some(d) => {
-                let args: Vec<&str> = d.args.iter().map(|a| a.shown.as_str()).collect();
-                (
-                    d.host_names.join(" + "),
-                    format!(
-                        "{} {}",
-                        d.command.clone().unwrap_or_default(),
-                        args.join(" ")
-                    )
-                    .trim_end()
-                    .to_string(),
-                )
+        let home = self.env.home.display().to_string();
+        let mut lines = column![].spacing(2);
+        let mut hosts: Vec<String> = Vec::new();
+        for &si in list {
+            let Some(d) = inv.servers[si]
+                .declarations
+                .iter()
+                .map(|&i| &inv.declarations[i])
+                .find(|d| d.enabled && d.transport == Transport::Stdio)
+            else {
+                continue;
+            };
+            let args: Vec<&str> = d.args.iter().map(|a| a.shown.as_str()).collect();
+            let cmd = format!(
+                "{} {}",
+                d.command.clone().unwrap_or_default(),
+                args.join(" ")
+            )
+            .trim_end()
+            .replace(&home, "~");
+            let host = d.host_names.join(" + ");
+            if !hosts.contains(&host) {
+                hosts.push(host.clone());
             }
-            None => (String::new(), String::new()),
+            lines = lines.push(
+                row![
+                    text(host)
+                        .size(11)
+                        .style(text::secondary)
+                        .width(Length::Fixed(170.0)),
+                    text(cmd).size(11).font(iced::Font::MONOSPACE),
+                ]
+                .spacing(8),
+            );
+        }
+        let title = if list.len() > 1 {
+            s.t("probe.confirm_all_title", &[("n", &list.len().to_string())])
+        } else {
+            s.t("probe.confirm_title", &[])
         };
         container(
             column![
-                text(s.t("probe.confirm_title", &[])).size(16),
-                text(s.t(
-                    "probe.confirm_text",
-                    &[("host", &host), ("command", &command)]
-                ))
-                .size(13),
+                text(title).size(16),
+                text(s.t("probe.confirm_intro", &[("hosts", &hosts.join(", "))])).size(13),
+                inner(lines.into()),
+                text(s.t("probe.confirm_outro", &[]))
+                    .size(12)
+                    .style(text::secondary),
                 checkbox(s.t("probe.confirm_ask", &[]), self.dont_ask)
                     .on_toggle(Message::ProbeAskToggle)
                     .size(16)
@@ -1032,13 +1148,59 @@ impl App {
 
     fn view_findings(&self, inv: &Inventory) -> Element<'_, Message> {
         let s = &self.strings;
-        let mut col = column![text(s.t("findings.title", &[]))
-            .size(12)
-            .style(text::secondary)]
-        .spacing(6);
+        let report = cost::report(inv, &self.probes);
+        let mut col = column![].spacing(6);
+        // Context cost per host, when something has been probed.
+        if report.hosts.iter().any(|h| h.probed > 0) {
+            col = col.push(text(s.t("cost.title", &[])).size(12).style(text::secondary));
+            let mut lines = column![].spacing(2);
+            for h in report
+                .hosts
+                .iter()
+                .filter(|h| h.probed + h.unprobed + h.failed > 0)
+            {
+                let mut notes: Vec<String> = Vec::new();
+                if h.unprobed > 0 {
+                    notes.push(s.t("cost.unprobed", &[("n", &h.unprobed.to_string())]));
+                }
+                if h.failed > 0 {
+                    notes.push(s.t("cost.failed", &[("n", &h.failed.to_string())]));
+                }
+                if h.may_defer {
+                    notes.push(s.t("cost.defer", &[]));
+                }
+                let heavy = h.tokens > cost::HOST_THRESHOLD;
+                lines = lines.push(
+                    row![
+                        text(h.host_name.clone())
+                            .size(12)
+                            .width(Length::Fixed(190.0)),
+                        text(format!("~{}", cost::thousands(h.tokens)))
+                            .size(12)
+                            .font(iced::Font::MONOSPACE)
+                            .color(if heavy {
+                                alert(self.dark)
+                            } else {
+                                good(self.dark)
+                            })
+                            .width(Length::Fixed(80.0)),
+                        text(notes.join(" · ")).size(11).style(text::secondary),
+                    ]
+                    .spacing(8)
+                    .align_y(iced::Alignment::Center),
+                );
+            }
+            col = col.push(inner(lines.into()));
+        }
+        col = col.push(
+            text(s.t("findings.title", &[]))
+                .size(12)
+                .style(text::secondary),
+        );
         let shown: Vec<(usize, &mcproster_core::model::Finding)> = inv
             .findings
             .iter()
+            .chain(report.findings.iter())
             .enumerate()
             .filter(|(_, f)| self.show_off || f.kind != FindingKind::Disabled)
             .collect();
@@ -1053,6 +1215,7 @@ impl App {
             );
         }
         let home = self.env.home.display().to_string();
+        let n_inv = inv.findings.len();
         for (fi, f) in shown {
             let key = format!("finding.{}", kind_slug(f.kind));
             let color = match f.kind {
@@ -1061,21 +1224,44 @@ impl App {
                 | FindingKind::ConfirmationsSkipped
                 | FindingKind::CommandNotFound
                 | FindingKind::VersionMismatch
-                | FindingKind::Unreadable => alert(self.dark),
-                FindingKind::Duplicate | FindingKind::Disabled => neutral_pill(self.dark),
+                | FindingKind::Unreadable
+                | FindingKind::ContextCost => alert(self.dark),
+                FindingKind::Duplicate | FindingKind::Disabled | FindingKind::PackageNotCached => {
+                    neutral_pill(self.dark)
+                }
             };
             let mut block = column![
                 pill(s.t(&key, &[]), color),
                 text(f.message.replace(&home, "~")).size(12),
             ]
             .spacing(4);
-            let actions = self.actions_for(inv, f);
-            if !actions.is_empty() {
+            let acts = actions::actions_for(&self.rules, inv, f);
+            if !acts.is_empty() {
                 let mut a = column![text(s.t("action.title", &[]))
                     .size(11)
                     .style(text::secondary)]
                 .spacing(2);
-                for (label, copy) in actions {
+                for act in acts {
+                    let (label, copy) = match act {
+                        Action::HostCommand { command, .. } => {
+                            (s.t("action.cli", &[("cmd", &command)]), Some(command))
+                        }
+                        Action::EditInHost { host } => {
+                            (s.t("action.edit", &[("host", &host)]), None)
+                        }
+                        Action::OpenFile => (s.t("action.open", &[]), None),
+                        Action::ReduceContext { host, may_defer } => (
+                            s.t(
+                                if may_defer {
+                                    "action.reduce_defer"
+                                } else {
+                                    "action.reduce"
+                                },
+                                &[("host", &host)],
+                            ),
+                            None,
+                        ),
+                    };
                     let mut r = row![text(label).size(11).width(Length::Fill)]
                         .spacing(6)
                         .align_y(iced::Alignment::Center);
@@ -1120,52 +1306,22 @@ impl App {
                         ..Default::default()
                     }
                 });
-            col = col.push(mouse_area(c).on_press(Message::SelectFinding(fi)));
+            // Cost findings come after the inventory ones: select by their first declaration.
+            let msg = if fi < n_inv {
+                Message::SelectFinding(fi)
+            } else {
+                match f.declarations.first().and_then(|&d| {
+                    inv.servers
+                        .iter()
+                        .position(|sv| sv.declarations.contains(&d))
+                }) {
+                    Some(si) => Message::Select(si),
+                    None => Message::SelectFinding(0),
+                }
+            };
+            col = col.push(mouse_area(c).on_press(msg));
         }
         container(col).padding([4, 0]).into()
-    }
-
-    /// Displayed-only actions for a finding: the host's own command when the rule gives
-    /// one, otherwise an edit hint. Nothing here is ever executed by MCProster.
-    fn actions_for(
-        &self,
-        inv: &Inventory,
-        f: &mcproster_core::model::Finding,
-    ) -> Vec<(String, Option<String>)> {
-        let s = &self.strings;
-        let mut out = Vec::new();
-        let mut seen = BTreeSet::new();
-        for &di in &f.declarations {
-            let d = &inv.declarations[di];
-            for (hid, hname) in d.hosts.iter().zip(d.host_names.iter()) {
-                if !seen.insert(hid.clone()) {
-                    continue;
-                }
-                let hint = self.rules.host(hid).and_then(|h| h.remove_hint.clone());
-                match hint {
-                    Some(h) => {
-                        let cmd = h.replace("<name>", &d.name).replace(
-                            "<user|local|project>",
-                            if d.scope == mcproster_core::hosts::Scope::User {
-                                "user"
-                            } else {
-                                "local"
-                            },
-                        );
-                        out.push((s.t("action.cli", &[("cmd", &cmd)]), Some(cmd)));
-                    }
-                    None if hid == "claude-desktop" => {
-                        out.push((s.t("action.edit", &[("host", hname)]), None));
-                    }
-                    None => out.push((s.t("action.open", &[]), None)),
-                }
-            }
-        }
-        if f.kind == FindingKind::Unreadable {
-            out.clear();
-            out.push((s.t("action.open", &[]), None));
-        }
-        out
     }
 }
 
@@ -1322,6 +1478,8 @@ fn kind_slug(k: FindingKind) -> &'static str {
         FindingKind::VersionMismatch => "version-mismatch",
         FindingKind::Duplicate => "duplicate",
         FindingKind::Unreadable => "unreadable",
+        FindingKind::ContextCost => "context-cost",
+        FindingKind::PackageNotCached => "package-not-cached",
         FindingKind::Disabled => "disabled",
     }
 }

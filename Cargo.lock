@@ -1934,7 +1934,7 @@ dependencies = [
 
 [[package]]
 name = "mcproster"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "iced",
  "mcproster-core",
@@ -1944,7 +1944,7 @@ dependencies = [
 
 [[package]]
 name = "mcproster-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -1954,7 +1954,7 @@ dependencies = [
 
 [[package]]
 name = "mcproster-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "chrono",

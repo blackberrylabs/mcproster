@@ -14,6 +14,8 @@
 //! - a secret is masked the moment it is read and never stored in clear.
 #![forbid(unsafe_code)]
 
+pub mod actions;
+pub mod cost;
 pub mod env;
 pub mod hosts;
 pub mod inventory;

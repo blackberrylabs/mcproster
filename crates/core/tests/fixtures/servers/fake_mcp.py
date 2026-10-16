@@ -21,9 +21,16 @@ for line in sys.stdin:
             "capabilities": {"tools": {}},
             "serverInfo": {"name": "fake-mcp", "version": os.environ.get("FAKE_VERSION", "9.9.9")}}}
     elif method == "tools/list":
-        out = {"jsonrpc": "2.0", "id": rid, "result": {"tools": [
+        tools = [
             {"name": "ping", "description": "Answers pong.\nSecond line ignored."},
-            {"name": "echo", "description": "Returns its input. " + "x" * 200}]}}
+            {"name": "echo", "description": "Returns its input. " + "x" * 200}]
+        if os.environ.get("FAKE_HEAVY") == "1":
+            # Twelve tools with fat schemas: about 2 000 characters each.
+            for i in range(12):
+                props = {f"field_{j}": {"type": "string", "description": "lorem ipsum " * 8} for j in range(12)}
+                tools.append({"name": f"heavy_{i}", "description": "A heavy tool. " * 20,
+                              "inputSchema": {"type": "object", "properties": props}})
+        out = {"jsonrpc": "2.0", "id": rid, "result": {"tools": tools}}
     elif rid is None:
         continue  # notification
     else:

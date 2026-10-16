@@ -167,7 +167,40 @@ fn severity(k: FindingKind) -> u8 {
         FindingKind::VersionMismatch => 4,
         FindingKind::Duplicate => 5,
         FindingKind::Unreadable => 6,
-        FindingKind::Disabled => 7,
+        FindingKind::ContextCost => 7,
+        FindingKind::PackageNotCached => 8,
+        FindingKind::Disabled => 9,
+    }
+}
+
+/// Is a runner package already in the local cache? `npx` keeps
+/// `~/.npm/_npx/<hash>/node_modules/<package>`; `uv` keeps unpacked wheels under
+/// `~/.cache/uv/archive-v0/<hash>/lib/python*/site-packages/<name>` (observed layouts, see
+/// `docs/context-cost.md`). `None` when the runner is not npx/bunx/uvx/pipx.
+pub fn package_cached(env: &Env, command: &str, package: &str) -> Option<bool> {
+    let runner = Path::new(command)
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_default();
+    match runner.as_str() {
+        "npx" | "bunx" | "pnpx" => {
+            let pattern = env
+                .home
+                .join(".npm/_npx/*/node_modules")
+                .join(package)
+                .join("package.json");
+            Some(expand_glob(&pattern).into_iter().any(|p| p.is_file()))
+        }
+        "uvx" | "pipx" => {
+            let name = package.replace('-', "_").to_lowercase();
+            let pattern = env
+                .home
+                .join(".cache/uv/archive-v0/*/lib/python*/site-packages")
+                .join(&name);
+            let pattern2 = env.home.join(".local/pipx/venvs").join(package);
+            Some(expand_glob(&pattern).into_iter().any(|p| p.is_dir()) || pattern2.is_dir())
+        }
+        _ => None,
     }
 }
 
@@ -695,6 +728,19 @@ fn per_declaration_findings(declarations: &[Declaration], env: &Env, findings: &
                 declarations: vec![i],
                 file: Some(d.file.clone()),
             });
+        }
+        // Runner package in the local cache? Informational: the command works but downloads.
+        if d.transport == Transport::Stdio && d.enabled {
+            if let (Some(cmd), Some(pkg)) = (&d.command, &d.package) {
+                if package_cached(env, cmd, pkg) == Some(false) {
+                    findings.push(Finding {
+                        kind: FindingKind::PackageNotCached,
+                        message: format!("{where_}: `{pkg}` is not in the local cache — it will be downloaded at first start"),
+                        declarations: vec![i],
+                        file: Some(d.file.clone()),
+                    });
+                }
+            }
         }
         // Command present on this machine? Only for stdio, only when the command is literal.
         if d.transport == Transport::Stdio && d.enabled {

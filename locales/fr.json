@@ -69,5 +69,19 @@
   "kpi.findings": "Constats",
   "kpi.secrets": "Secrets en clair",
   "panel.title": "Serveur",
-  "panel.subtitle": "Où il est déclaré, comment il démarre, ce qu'il répond. MCProster ne modifie rien ici."
+  "panel.subtitle": "Où il est déclaré, comment il démarre, ce qu'il répond. MCProster ne modifie rien ici.",
+  "probe.confirm_all_title": "Avant de tester {n} serveurs",
+  "probe.confirm_intro": "MCProster va lancer chaque serveur exactement comme son hôte le ferait ({hosts}) :",
+  "probe.confirm_outro": "Chacun reçoit initialize et tools/list, au plus 10 secondes, puis est arrêté. Aucun outil n'est appelé. Les résultats (noms, versions, noms et tailles d'outils) sont gardés dans ~/.config/mcproster/probes.json.",
+  "probe.test_all": "Tester tout",
+  "cost.title": "Coût en contexte par hôte (~tokens de définitions d'outils, serveurs sondés)",
+  "cost.unprobed": "au moins — {n} non sondé(s)",
+  "cost.failed": "{n} sonde(s) en échec",
+  "cost.defer": "peut charger les outils à la demande : borne haute",
+  "table.tokens": "~tokens",
+  "finding.context-cost": "Coût en contexte",
+  "finding.package-not-cached": "Pas en cache",
+  "action.reduce": "{host} : désactiver les serveurs que vous n'utilisez pas dans cet hôte",
+  "action.reduce_defer": "{host} : désactiver les serveurs inutilisés, ou s'en remettre à son chargement d'outils à la demande",
+  "probe.tokens": "~{n} tokens de définitions d'outils"
 }

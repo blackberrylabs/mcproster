@@ -194,6 +194,64 @@ Tranchees le 2026-10-16 (conversation Cowork, entree JOURNAL du meme jour) :
    crates.io et sans homonyme etabli (« scan » ecarte : signifie securite dans l'ecosysteme
    MCP — mcp-scan/Snyk, MCPScan/Ant Group, mcp-scanner/Cisco).
 
-Ouvertes (a trancher a l'etape 0 ou 1) : sonde des serveurs HTTP/SSE (lancer ou seulement
-verifier que l'URL repond ?) ; faut-il lire les projets (`.mcp.json`, `.cursor/mcp.json`)
-sous tout le home ou seulement sous des racines declarees ? ; outils existants a comparer.
+Tranchees a l'etape 0-2 : sonde HTTP/SSE → non (R2) ; projets → racines `--root` + les
+projets connus de Claude Code ; outils existants → compares (§3).
+
+## 11. Version 0.2 — « ce que vos serveurs MCP coutent en contexte » (cadrage du 2026-10-16)
+
+### Origine
+
+Lecture des douleurs de la communaute le 16/10 (`00_cadrage/2026-10-16_douleurs_communaute.md`) :
+les serveurs MCP mangent la fenetre de contexte avant le premier mot — un utilisateur a
+mesure 43 000 tokens sur 99 000 au demarrage pour 127 outils (A. Szablowski, 2026), au prix
+d'un proxy de journalisation. MCProster a deja la donnee sous la main (`tools/list` de la
+sonde) et ne la garde pas. La 0.2 la montre. Alexandre : « on part sur MCP roster 0.2 ».
+
+### Decisions (une par une, 16/10)
+
+- **D7 — Tester tout.** `mcproster probe --all` et un bouton dans l'app : tous les serveurs
+  stdio actives, une commande par lancement distinct, **une seule confirmation qui liste les
+  commandes** qui vont etre lancees (« ne plus demander » retenu comme en 0.1). Sans sonde,
+  pas de cout : R4 inchangee.
+- **D8 — Seuils absolus** : un serveur au-dessus de ~5 000 tokens, ou un hote dont la somme
+  depasse ~20 000 (≈ 10 % d'une fenetre de 200 000) → constat orange ; en dessous, information.
+  Chiffres ecrits et sources dans `docs/context-cost.md` ; mode relatif seulement si demande.
+- **D9 — On garde des chiffres, pas des schemas** : par resultat de sonde, octets des schemas
+  et estimation de tokens ; par outil, **nom et part en tokens** (un chiffre). Jamais le JSON
+  des outils ni leurs descriptions sur disque : R3 et R8 intactes, `probes.json` reste petit.
+- **D10 — Perimetre** : le cout en contexte + (a) commandes de retrait dans `findings` en
+  CLI, (b) paquet present ou non dans les caches `npx`/`uv`, (d) captures d'ecran dans le
+  README. (c) Kilo Code **reporte** : refondu en 2026, configuration encore mouvante.
+
+### Ce que ca fait
+
+- **Mesure** : pour chaque outil renvoye par `tools/list`, longueur en caracteres du JSON
+  (`name`, `description`, `inputSchema`, et `outputSchema`/`annotations` s'ils existent) ;
+  estimation de tokens = caracteres / 4, arrondie, toujours affichee avec « ~ ». Hypotheses
+  documentees : chaque hote serialise a sa facon (±20 %) ; Claude Code peut **differer** le
+  chargement des outils MCP (recherche d'outils) — la ligne de cet hote le dit.
+- **Par serveur** : nombre d'outils, ~tokens, les trois outils les plus lourds. **Par hote** :
+  somme des serveurs actives qu'il declare et qui ont ete sondes ; s'il en reste de non
+  sondes, le total est « au moins ». Dans l'app : une colonne « ~tokens » dans la table, le
+  detail des outils avec leur part, une ligne par hote au-dessus des constats.
+- **Constat `context-cost`** (D8) avec l'action affichee : desactiver dans l'hote (`disabled`,
+  `enabled = false`, reglages), ou, pour Claude Code, la recherche d'outils a la demande.
+- **Reliquats** : (a) `remove_hint` dans `findings` CLI ; (b) constat d'information
+  `package-not-cached` quand `npx -y <paquet>` / `uvx <paquet>` ne trouve pas le paquet dans
+  `~/.npm/_npx/*/node_modules/<paquet>` ou le cache uv — « marchera, mais telechargera » ;
+  (d) deux captures (clair, sombre) dans le README.
+- **Ce qui ne change pas** : lecture seule, aucune sortie reseau, sonde sur demande, serveurs
+  distants non sondes, `~/.config/mcproster/` seul dossier ecrit.
+
+### Tests
+
+Faux serveur avec des schemas lourds → estimation au-dessus du seuil → constat ; `probe --all`
+sur le faux home (commandes dedoublonnees, confirmation, `--yes`) ; cache npx/uv simule dans
+le faux home ; « aucun schema ni description d'outil dans `probes.json` » ; les tests 0.1
+inchanges.
+
+### Livraison
+
+0.2.0 : CHANGELOG, paquets reconstruits, tag et release sur accord ; mise a jour de
+`docs/hosts.md` si une regle bouge. Textes de presentation : decision d'Alexandre, pas le
+jour de la sortie.

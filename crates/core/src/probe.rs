@@ -21,7 +21,19 @@ pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ToolInfo {
     pub name: String,
+    /// First line of the description, shown live; never written to disk (BRIEF D9).
+    #[serde(skip)]
     pub description: Option<String>,
+    /// Estimated tokens of this tool's definition as sent to the model (name, description,
+    /// input schema…): characters of its JSON / 4, rounded up.
+    #[serde(default)]
+    pub tokens: u64,
+}
+
+/// Rough tokens for a JSON text: four characters per token, rounded up. Hosts serialise
+/// tool definitions their own way, so this is an estimate (±20 %), always shown with "~".
+pub fn estimate_tokens(json_chars: usize) -> u64 {
+    json_chars.div_ceil(4) as u64
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,6 +46,12 @@ pub struct ProbeResult {
     pub server_version: Option<String>,
     pub protocol_version: Option<String>,
     pub tools: Vec<ToolInfo>,
+    /// Size of all tool definitions (JSON) returned by `tools/list`.
+    #[serde(default)]
+    pub schema_bytes: u64,
+    /// Sum of the tools' estimated tokens.
+    #[serde(default)]
+    pub estimated_tokens: u64,
     pub duration_ms: u128,
     /// First lines the server wrote on stderr, if it failed (often the reason).
     pub stderr: Vec<String>,
@@ -93,6 +111,8 @@ pub fn probe_stdio(
         server_version: None,
         protocol_version: None,
         tools: Vec::new(),
+        schema_bytes: 0,
+        estimated_tokens: 0,
         duration_ms: 0,
         stderr: Vec::new(),
     };
@@ -198,7 +218,17 @@ pub fn probe_stdio(
                         d.to_string()
                     }
                 });
-                result.tools.push(ToolInfo { name, description });
+                let json_len = serde_json::to_string(t)
+                    .map(|j| j.chars().count())
+                    .unwrap_or(0);
+                let tokens = estimate_tokens(json_len);
+                result.schema_bytes += json_len as u64;
+                result.estimated_tokens += tokens;
+                result.tools.push(ToolInfo {
+                    name,
+                    description,
+                    tokens,
+                });
             }
         }
         Ok(())

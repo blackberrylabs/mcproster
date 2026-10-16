@@ -13,7 +13,9 @@ you. **It never writes to any of them.**
 clients; MCProster does the opposite job: it tells you what is there, where, and what to
 look at — then you act with each host's own settings.
 
-Status: **0.1.0**, first release. Linux. 100 % Rust. MIT.
+Status: **0.2.0**. Linux. 100 % Rust. MIT.
+
+![MCProster — light theme](docs/screenshots/light.png)
 
 ## What it shows
 
@@ -37,9 +39,16 @@ Status: **0.1.0**, first release. Linux. 100 % Rust. MIT.
 
   Each finding comes with what *you* can do — `claude mcp remove …`, the host's settings
   page — displayed, never executed.
-- **A probe, on demand**: start one server exactly as its host would, ask it `initialize`
-  and `tools/list`, stop it. Ten seconds at most, no tool called, remote servers never
-  contacted. You see the server's name and version and the tools it exposes.
+- **A probe, on demand**: start one server exactly as its host would — or all of them,
+  after one confirmation that lists the commands — ask it `initialize` and `tools/list`,
+  stop it. Ten seconds at most, no tool called, remote servers never contacted. You see
+  the server's name and version and the tools it exposes.
+- **What they cost in context** (0.2): every host sends the definitions of every tool to
+  the model with every request; one user measured 43 000 tokens of a 99 000-token window
+  gone before the first word. After a probe, MCProster shows ~tokens per tool, per server
+  and per host, and raises a finding above ~5 000 tokens for one server or ~20 000 for one
+  host. Estimates (characters / 4, ±20 %), method and thresholds in
+  [`docs/context-cost.md`](docs/context-cost.md).
 
 ## Three promises
 
@@ -79,13 +88,13 @@ Packages are on the [releases page](https://github.com/blackberrylabs/mcproster/
 
 ```bash
 # Debian / Ubuntu
-sudo apt install ./mcproster_0.1.0-1_amd64.deb
+sudo apt install ./mcproster_0.2.0-1_amd64.deb
 
 # Fedora
-sudo dnf install ./mcproster-0.1.0-1.x86_64.rpm
+sudo dnf install ./mcproster-0.2.0-1.x86_64.rpm
 
 # Any distribution
-chmod +x MCProster-0.1.0-x86_64.AppImage && ./MCProster-0.1.0-x86_64.AppImage
+chmod +x MCProster-0.2.0-x86_64.AppImage && ./MCProster-0.2.0-x86_64.AppImage
 ```
 
 Each package ships both the desktop app (`mcproster-app`) and the command line
@@ -99,16 +108,21 @@ mcproster findings          # duplicates, secrets, missing commands, wide access
 mcproster files             # the files that were looked at
 mcproster hosts             # what MCProster knows about each host, and how
 mcproster probe <server>    # start it as its host would, initialize + tools/list, stop it
+mcproster probe --all       # every enabled stdio server, after one confirmation listing the commands
+mcproster context           # ~tokens of tool definitions per server and per host
 mcproster --json list       # for scripts
 mcproster --home /mnt/old   # inventory another home (a backup, a test fixture)
 ```
 
 ## Desktop app
 
-Same core, one window: the servers × hosts table with a text filter, a host picker and
-"findings only" / "disabled & legacy" toggles; the detail of the selected server with
-*Open file*, *Copy path*, *Copy command* and *Test*; the findings underneath, each with the
-action you could take. English by default, French on demand; light and dark.
+Same core, one window: the servers × hosts table (with a ~tokens column once probed), a
+text filter, a host picker and "findings only" / "disabled & legacy" toggles; *Test all*;
+the detail of the selected server with *Open file*, *Copy path*, *Copy command* and
+*Test*; the context cost per host and the findings underneath, each with the action you
+could take. English by default, French on demand; light and dark.
+
+![MCProster — dark theme](docs/screenshots/dark.png)
 
 ## Reading the output
 
@@ -122,6 +136,10 @@ action you could take. English by default, French on demand; light and dark.
   no official build). The output says so; treat it with the corresponding care.
 - **Disabled** servers are still declarations: they are listed, marked, and hidden with
   the "disabled & legacy" toggle.
+- **Not in cache** is information, not a problem: an `npx` / `uvx` server whose package is
+  not on the machine yet will work, but will download first.
+- **Context cost** figures are estimates: hosts serialise tool definitions their own way,
+  and Claude Code can load tools on demand, so its figure is an upper bound.
 
 ## How it is built
 

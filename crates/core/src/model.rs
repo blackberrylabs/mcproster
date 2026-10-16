@@ -127,6 +127,12 @@ pub enum FindingKind {
     ConfirmationsSkipped,
     Unreadable,
     Disabled,
+    /// A probed server, or a host's probed servers together, weigh more than the thresholds
+    /// in `docs/context-cost.md`.
+    ContextCost,
+    /// `npx` / `uvx` package not found in the local cache: the command will work but will
+    /// download the package first.
+    PackageNotCached,
 }
 
 #[derive(Debug, Clone, Serialize)]

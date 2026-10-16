@@ -69,5 +69,19 @@
   "kpi.findings": "Findings",
   "kpi.secrets": "Secrets in clear",
   "panel.title": "Server",
-  "panel.subtitle": "Where it is declared, how it is started, what it answers. Nothing here is changed by MCProster."
+  "panel.subtitle": "Where it is declared, how it is started, what it answers. Nothing here is changed by MCProster.",
+  "probe.confirm_all_title": "Before testing {n} servers",
+  "probe.confirm_intro": "MCProster will start each server exactly as its host would ({hosts}):",
+  "probe.confirm_outro": "Each gets initialize and tools/list, at most 10 seconds, then is stopped. No tool is called. Results (names, versions, tool names and sizes) are kept in ~/.config/mcproster/probes.json.",
+  "probe.test_all": "Test all",
+  "cost.title": "Context cost per host (~tokens of tool definitions, probed servers)",
+  "cost.unprobed": "at least — {n} not probed",
+  "cost.failed": "{n} probe(s) failed",
+  "cost.defer": "can load tools on demand: upper bound",
+  "table.tokens": "~tokens",
+  "finding.context-cost": "Context cost",
+  "finding.package-not-cached": "Not in cache",
+  "action.reduce": "{host}: disable the servers you do not use in this host",
+  "action.reduce_defer": "{host}: disable the servers you do not use, or rely on its on-demand tool loading",
+  "probe.tokens": "~{n} tokens of tool definitions"
 }

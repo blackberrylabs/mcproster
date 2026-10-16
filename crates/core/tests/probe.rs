@@ -105,3 +105,37 @@ fn an_empty_version_is_absent_not_empty() {
     assert_eq!(r.server_version, None);
     assert_eq!(r.server_name.as_deref(), Some("fake-mcp"));
 }
+
+#[test]
+fn tool_sizes_are_estimated_and_descriptions_never_saved() {
+    let mut env = BTreeMap::new();
+    env.insert("FAKE_HEAVY".to_string(), "1".to_string());
+    let r = probe_stdio(
+        "python3",
+        &[server()],
+        &env,
+        None,
+        &BTreeMap::new(),
+        Duration::from_secs(10),
+    );
+    assert!(r.ok, "{r:#?}");
+    assert_eq!(r.tools.len(), 14);
+    assert!(
+        r.estimated_tokens > mcproster_core::cost::SERVER_THRESHOLD,
+        "{}",
+        r.estimated_tokens
+    );
+    assert_eq!(
+        r.estimated_tokens,
+        r.tools.iter().map(|t| t.tokens).sum::<u64>()
+    );
+    let heavy = r.tools.iter().find(|t| t.name == "heavy_0").unwrap();
+    let ping = r.tools.iter().find(|t| t.name == "ping").unwrap();
+    assert!(heavy.tokens > 20 * ping.tokens);
+    // Saved form: names and numbers, no description text.
+    let saved = serde_json::to_string(&r).unwrap();
+    assert!(!saved.contains("Answers pong"));
+    assert!(!saved.contains("A heavy tool"));
+    assert!(saved.contains("\"heavy_0\""));
+    assert!(saved.contains("\"estimated_tokens\""));
+}

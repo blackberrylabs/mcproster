@@ -7,6 +7,43 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, nuit : la 0.2 codee
+
+- Coeur : chaque outil de `tools/list` est pese (caracteres du JSON / 4, « ~ »), par
+  serveur et par hote (`cost.rs`) ; constat `context-cost` aux seuils D8 ; `actions.rs`
+  sort du code de l'app pour servir aussi la CLI. `probes.json` ne garde plus les
+  descriptions d'outils (D9) ; les sondes echouees sont comptees a part des non sondees.
+- CLI : `probe --all` avec confirmation listant les commandes (`--yes` pour les scripts),
+  `context`, actions sous chaque constat. En mode `--home`, les commandes sont cherchees
+  dans le PATH de la machine courante (un backup monte n'a pas de PATH).
+- App : *Test all* → panneau listant les lancements, sondes en file une par une, colonne
+  ~tokens (orange au-dessus du seuil, ✗ si la sonde a echoue), bloc « coût par hôte » au-dessus
+  des constats, KPI Findings incluant les constats de cout.
+- Le faux home a maintenant des caches npx/uv simules ; le faux serveur a un mode
+  `FAKE_HEAVY` (14 outils, > 5 000 tokens). 33 tests verts, clippy propre.
+- Observation en sondant le faux home avec `--all` : le `npx` reel du cloud a telecharge et
+  lance `@playwright/mcp` — la sonde fait exactement ce que l'hote ferait, c'est voulu, et
+  c'est pour ca que la confirmation liste les commandes.
+- README 0.2 avec deux captures d'un home de demonstration (serveurs Python qui repondent,
+  un lourd, un doublon declare trois fois, un desactive, un secret, un distant).
+  CHANGELOG 0.2.0, `docs/context-cost.md`.
+
+## 2026-10-16, soir : cadrage de la 0.2
+
+- Alexandre : « Quel est le prochain module le plus interessant ? » puis « regarde dans la
+  communaute quelles sont les vraies douleurs ». Recherche web, synthese dans
+  `00_cadrage/2026-10-16_douleurs_communaute.md` : (1) agents qui suppriment — incidents de
+  50 a 370 Go documentes, aucun inspecteur lecture seule multi-hotes ; (2) serveurs MCP qui
+  mangent le contexte — 43k/99k tokens mesures ; (3) fichiers d'instructions trop longs —
+  limites 200 lignes / 32 Kio ; (4) secrets en clair — surtout dans les apps livrees, terrain
+  occupe ; l'idee « secrets dans les traces » retrogradee.
+- Decision d'Alexandre : **MCProster 0.2 d'abord** (cout en contexte), l'inventaire des
+  permissions des agents comme troisieme outil ensuite.
+- Quatre decisions une par une (BRIEF §11 : D7 a D10). Addendum ecrit, PLAN etape 6 ouverte.
+  Attend la validation d'Alexandre avant le code.
+- Regle de maison posee le meme soir dans `00_moi/CONVENTIONS.md` : outils separes, fondation
+  commune, la tour de controle rassemble sans absorber.
+
 ## 2026-10-16, MCProster 0.1.0 publie
 
 - Tag `v0.1.0` sur `main`, release GitHub avec les quatre fichiers. Verifie depuis le cloud :
