@@ -1,0 +1,26 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "lm-studio"
+name = "LM Studio"
+vendor = "Element Labs"
+kind = "desktop"
+status = "active"
+references = []
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.linux = "~/.lmstudio/mcp.json"
+path.macos = "~/.lmstudio/mcp.json"
+path.windows = "%USERPROFILE%\\.lmstudio\\mcp.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers" }
+[locations.source]
+kind = "documentation"
+url = "https://lmstudio.ai/blog/mcp"
+read_on = 2026-10-16
+quote = "mcp.json lives in ~/.lmstudio/mcp.json on macOS and Linux, and in %USERPROFILE%/.lmstudio/mcp.json on Windows. LM Studio currently follows Cursor's mcp.json notation."

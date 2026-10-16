@@ -1,0 +1,40 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "codex"
+name = "Codex CLI"
+vendor = "OpenAI"
+kind = "cli"
+status = "active"
+references = []
+remove_hint = "codex mcp remove <name>"
+list_hint = "codex mcp list"
+
+[[locations]]
+scope = "user"
+format = "toml"
+servers_key = "mcp_servers"
+entry = "object"
+path.any = "~/.codex/config.toml"
+map = { command = "command", args = "args", env = "env", cwd = "cwd", url = "url", headers = "http_headers", env_headers = "env_http_headers", bearer_env = "bearer_token_env_var", enabled = "enabled" }
+[locations.source]
+kind = "documentation"
+url = "https://learn.chatgpt.com/docs/extend/mcp?surface=cli"
+read_on = 2026-10-16
+quote = "Codex stores MCP settings in ~/.codex/config.toml. Each server gets a table named [mcp_servers.<server-name>]. bearer_token_env_var: environment variable holding a bearer token; enabled: set to false to disable a server without deleting it."
+note = "Secrets are expected to come from environment variables (bearer_token_env_var, env_http_headers): a literal token in http_headers is a finding."
+
+[[locations]]
+scope = "project"
+format = "toml"
+servers_key = "mcp_servers"
+entry = "object"
+path.any = ".codex/config.toml"
+map = { command = "command", args = "args", env = "env", cwd = "cwd", url = "url", headers = "http_headers", env_headers = "env_http_headers", bearer_env = "bearer_token_env_var", enabled = "enabled" }
+[locations.source]
+kind = "documentation"
+url = "https://learn.chatgpt.com/docs/extend/mcp?surface=cli"
+read_on = 2026-10-16
+quote = "For project-level settings, use .codex/config.toml, which applies to trusted projects only."

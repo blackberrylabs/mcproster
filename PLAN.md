@@ -38,7 +38,10 @@ Resultat visible attendu : `mcproster hosts` liste les hotes connus avec leur so
 `mcproster list` sur un faux home de test (fixtures : dix hotes, doublons, cles) donne la
 feuille d'appel ; tests verts ; zero source `to-verify`.
 
-- [ ] `hosts/*.toml` : une regle par hote, source lue et datee (ou `observed`)
+- [x] `hosts/*.toml` : 19 hotes lus (38 emplacements), 6 hotes ecartes avec la raison
+      (`_not-read.toml`) ; chaque emplacement cite sa source (doc, code source ou observe),
+      la date et la citation ; `docs/hosts.md` genere — 2026-10-16
+- [ ] Relecture des regles par Alexandre (`docs/hosts.md`)
 - [ ] Lecteurs : JSON, JSONC (commentaires VS Code), TOML, YAML → modele commun `Server`
 - [ ] Portees : globale, par projet (ou chercher les `.mcp.json` / `.cursor/mcp.json` ? question ouverte du BRIEF)
 - [ ] Doublons (meme paquet/binaire ou meme URL), versions cote a cote

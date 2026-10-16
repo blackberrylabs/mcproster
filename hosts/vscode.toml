@@ -1,0 +1,75 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "vscode"
+name = "Visual Studio Code (Copilot)"
+vendor = "Microsoft"
+kind = "editor"
+status = "active"
+references = ["${input:id}", "${env:NAME}", "${workspaceFolder}"]
+
+# User profile file. Default profile folder; other profiles under User/profiles/<id>/.
+[[locations]]
+scope = "user"
+format = "jsonc"
+servers_key = "servers"
+entry = "object"
+inputs_key = "inputs"
+path.linux = ["~/.config/Code/User/mcp.json", "~/.config/Code/User/profiles/*/mcp.json"]
+path.macos = ["~/Library/Application Support/Code/User/mcp.json", "~/Library/Application Support/Code/User/profiles/*/mcp.json"]
+path.windows = ["%APPDATA%\\Code\\User\\mcp.json", "%APPDATA%\\Code\\User\\profiles\\*\\mcp.json"]
+map = { command = "command", args = "args", env = "env", env_file = "envFile", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://code.visualstudio.com/docs/copilot/reference/mcp-configuration"
+read_on = 2026-10-16
+quote = "MCP: Open User Configuration — opens the mcp.json file in your user profile. Servers in a top-level servers object; inputs: an optional array of input variable definitions for sensitive information like API keys."
+note = "The MCP page gives no disk path; the profiles page gives the profiles folder (Linux $HOME/.config/Code/User/profiles, macOS $HOME/Library/Application Support/Code/User/profiles, Windows %APPDATA%\\Code\\User\\profiles — https://code.visualstudio.com/docs/configure/profiles, read 2026-10-16). The default profile lives directly in User/: derived, to confirm on a machine. Insiders uses `Code - Insiders`. The old settings.json `mcp.servers` setting is no longer in the documentation; still read as a legacy location (see below)."
+
+[[locations]]
+scope = "project"
+format = "jsonc"
+servers_key = "servers"
+entry = "object"
+inputs_key = "inputs"
+path.any = ".vscode/mcp.json"
+map = { command = "command", args = "args", env = "env", env_file = "envFile", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://code.visualstudio.com/docs/copilot/reference/mcp-configuration"
+read_on = 2026-10-16
+quote = ".vscode/mcp.json (VS Code format): It defines servers in a top-level servers object."
+
+# Portable format: the same .mcp.json Claude Code reads.
+[[locations]]
+scope = "project"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = ".mcp.json"
+shared_with = ["claude-code"]
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://code.visualstudio.com/docs/copilot/reference/mcp-configuration"
+read_on = 2026-10-16
+quote = ".mcp.json at the workspace root (portable Copilot format): It defines servers in a top-level mcpServers object."
+
+# Legacy: `mcp.servers` inside settings.json (before mcp.json existed).
+[[locations]]
+scope = "user"
+format = "jsonc"
+servers_key = "mcp.servers"
+entry = "object"
+legacy = true
+path.linux = "~/.config/Code/User/settings.json"
+path.macos = "~/Library/Application Support/Code/User/settings.json"
+path.windows = "%APPDATA%\\Code\\User\\settings.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "observed"
+read_on = 2026-10-16
+quote = "mcp.servers in settings.json — earlier VS Code releases; the current documentation no longer mentions it"
+note = "Kept so an old declaration that VS Code may still honour is not missed. Reported as legacy."

@@ -1,0 +1,37 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "cursor"
+name = "Cursor"
+vendor = "Anysphere"
+kind = "editor"
+status = "active"
+references = ["${env:NAME}"]
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = "~/.cursor/mcp.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://cursor.com/docs/context/mcp"
+read_on = 2026-10-16
+quote = "Create ~/.cursor/mcp.json in your home directory for tools available everywhere."
+
+[[locations]]
+scope = "project"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = ".cursor/mcp.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://cursor.com/docs/context/mcp"
+read_on = 2026-10-16
+quote = "Create .cursor/mcp.json in your project for project-specific tools. Variables are resolved in command, args, env, url, and headers: ${env:NAME}"

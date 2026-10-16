@@ -58,6 +58,10 @@ avoir plusieurs hotes avec des serveurs declares.
 
 ## 4. Contexte a verifier a l'etape 1 (sources datees, comme les regles de Cleanator)
 
+> **Rev. 3 (2026-10-16)** : la table ci-dessous est celle du cadrage ; la reference est desormais
+> `hosts/*.toml` et `docs/hosts.md` (19 hotes, 38 emplacements, chacun avec sa source citee).
+
+
 Chaque hote a sa documentation ; **aucun chemin ni format ci-dessous n'est tenu pour acquis
 avant d'avoir ete lu dans sa source et date**, ou observe sur une vraie machine et marque
 `observed`. Liste de depart (connaissance au 2026-10-16, a confirmer) :

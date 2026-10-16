@@ -1,0 +1,54 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "continue"
+name = "Continue"
+vendor = "Continue Dev, Inc."
+kind = "extension"
+status = "active"
+references = ["${{ secrets.NAME }}"]
+
+[[locations]]
+scope = "user"
+format = "yaml"
+servers_key = "mcpServers"
+entry = "array"
+name_key = "name"
+path.any = "~/.continue/config.yaml"
+map = { command = "command", args = "args", env = "env", cwd = "cwd", url = "url", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://docs.continue.dev/customize/deep-dives/configuration"
+read_on = 2026-10-16
+quote = "Local user-level configuration is stored and can be edited in your home directory in config.yaml: ~/.continue/config.yaml (macOS / Linux), %USERPROFILE%\\.continue\\config.yaml (Windows)"
+note = "mcpServers is an array of blocks with name, type (sse, stdio, streamable-http), command, args, env, url (https://docs.continue.dev/customize/deep-dives/mcp, read 2026-10-16). Secrets are referenced as ${{ secrets.NAME }}."
+
+[[locations]]
+scope = "project"
+format = "yaml"
+servers_key = "mcpServers"
+entry = "array"
+name_key = "name"
+path.any = ".continue/mcpServers/*.yaml"
+map = { command = "command", args = "args", env = "env", cwd = "cwd", url = "url", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://docs.continue.dev/customize/deep-dives/mcp"
+read_on = 2026-10-16
+quote = "Create a folder called .continue/mcpServers at the top level of your workspace."
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "experimental.modelContextProtocolServers"
+entry = "array"
+legacy = true
+path.any = "~/.continue/config.json"
+map = { command = "transport.command", args = "transport.args", env = "transport.env", url = "transport.url", type = "transport.type" }
+[locations.source]
+kind = "observed"
+read_on = 2026-10-16
+quote = "config.yaml replaces config.json, which is deprecated (documentation). A config.json is still present on the test machine."
+note = "Key path and transport shape from the legacy format as remembered: to verify against the migration guide before v0.1."

@@ -7,6 +7,24 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, etape 1 : regles d'hotes sourcees
+
+- 19 hotes, 38 emplacements, ecrits en TOML (`hosts/`), chaque emplacement avec sa source :
+  documentation editeur (URL, date, citation), code source quand la doc ne donne pas le
+  chemin (Zed `paths.rs`, Cline `disk.ts`, Roo `globalFileNames.ts` + `McpHub.ts`), ou
+  `observed` (Linux de Claude Desktop, registre des extensions, `settings.json` legacy de
+  VS Code, `config.json` legacy de Continue). Rien de memoire : ce qui n'a pas pu etre lu
+  est marque « derived, to confirm » dans la note.
+- 6 hotes ecartes de la v0 avec la raison (`hosts/_not-read.toml`) : Kilo Code (reconstruit
+  en 2026, nouvel emplacement non documente), JetBrains (XML interne), Warp (stockage
+  interne), 5ire et Trae (non etablis), Aider (pas de MCP).
+- Decouvertes consignees dans `docs/hosts.md` : `.mcp.json` lu par Claude Code **et**
+  VS Code (un fichier, deux hotes → partage, pas doublon) ; six syntaxes de reference a
+  l'environnement a ne jamais masquer ; serveurs desactives = declaration quand meme ;
+  `trust`/`autoApprove`/`alwaysAllow` = constat.
+- Schema d'une regle documente dans `docs/hosts.md` ; BRIEF §4 renvoie vers cette reference.
+- A faire relire par Alexandre avant d'ecrire le lecteur Rust.
+
 ## 2026-10-16, etape 0 close : banc d'essai reel, depot git
 
 - Trois commandes passees : `claude mcp add --scope user apipriceindex -- <binaire>` (binaire

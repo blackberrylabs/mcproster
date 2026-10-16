@@ -1,0 +1,40 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "zed"
+name = "Zed"
+vendor = "Zed Industries"
+kind = "editor"
+status = "active"
+references = []
+
+[[locations]]
+scope = "user"
+format = "jsonc"
+servers_key = "context_servers"
+entry = "object"
+path.linux = ["$XDG_CONFIG_HOME/zed/settings.json", "~/.config/zed/settings.json", "$FLATPAK_XDG_CONFIG_HOME/zed/settings.json"]
+path.macos = "~/.config/zed/settings.json"
+path.windows = "%APPDATA%\\Zed\\settings.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", enabled = "enabled" }
+[locations.source]
+kind = "source-code"
+url = "https://github.com/zed-industries/zed/blob/main/crates/paths/src/paths.rs"
+read_on = 2026-10-16
+quote = "settings_file(): config_dir().join(\"settings.json\") — linux/freebsd: dirs::config_dir() [XDG_CONFIG_HOME, FLATPAK_XDG_CONFIG_HOME override].join(\"zed\"); other platforms: home_dir().join(\".config\").join(\"zed\"); windows: dirs::config_dir() [RoamingAppData].join(\"Zed\")"
+note = "The settings documentation gives no path. Key `context_servers` with command/args/env or url/headers from https://zed.dev/docs/ai/mcp (read 2026-10-16). Zed's settings.json accepts // comments (examples in the documentation): read as JSONC."
+
+[[locations]]
+scope = "project"
+format = "jsonc"
+servers_key = "context_servers"
+entry = "object"
+path.any = ".zed/settings.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", enabled = "enabled" }
+[locations.source]
+kind = "source-code"
+url = "https://github.com/zed-industries/zed/blob/main/crates/paths/src/paths.rs"
+read_on = 2026-10-16
+quote = "local_settings_file_relative_path(): \".zed/settings.json\""

@@ -1,0 +1,40 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+# Hosts MCProster knows of but does not read in v0, with the reason. Shown in `mcproster hosts`.
+id = "_not-read"
+name = "Hosts not read in v0"
+kind = "list"
+status = "out-of-scope"
+
+[[hosts]]
+id = "kilo-code"
+name = "Kilo Code"
+reason = "Rebuilt in 2026 (packages/kilo-vscode, publisher kilocode, name kilo-code — package.json read 2026-10-16); the previous Roo-like mcp_settings.json path no longer applies and the new location is not documented. To establish."
+
+[[hosts]]
+id = "jetbrains-ai"
+name = "JetBrains AI Assistant / Junie"
+reason = "MCP servers are kept in the IDE's options XML, per IDE and version. Not established."
+
+[[hosts]]
+id = "warp"
+name = "Warp"
+reason = "MCP servers are stored inside the application (no user-editable file documented)."
+
+[[hosts]]
+id = "5ire"
+name = "5ire"
+reason = "Not established."
+
+[[hosts]]
+id = "aider"
+name = "Aider"
+reason = "No native MCP support."
+
+[[hosts]]
+id = "trae"
+name = "Trae"
+reason = "Not established."

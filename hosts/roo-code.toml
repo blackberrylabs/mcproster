@@ -1,0 +1,40 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "roo-code"
+name = "Roo Code"
+vendor = "Roo Code, Inc."
+kind = "extension"
+status = "active"
+references = ["${env:NAME}"]
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.linux = "~/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/mcp_settings.json"
+path.macos = "~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/mcp_settings.json"
+path.windows = "%APPDATA%\\Code\\User\\globalStorage\\rooveterinaryinc.roo-cline\\settings\\mcp_settings.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type", disabled = "disabled", cwd = "cwd" }
+[locations.source]
+kind = "source-code"
+url = "https://github.com/RooCodeInc/Roo-Code/blob/main/src/shared/globalFileNames.ts"
+read_on = 2026-10-16
+quote = "mcpSettings: \"mcp_settings.json\" — McpHub.getMcpSettingsFilePath: path.join(await provider.ensureSettingsDirectoryExists(), GlobalFileNames.mcpSettings)"
+note = "Documentation (https://roocodeinc.github.io/Roo-Code/features/mcp/using-mcp-in-roo/) names the file but gives no path. Extension id from src/package.json: publisher RooVeterinaryInc, name roo-cline — VS Code lowercases the id for the globalStorage folder (derived, to confirm)."
+
+[[locations]]
+scope = "project"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = ".roo/mcp.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type", disabled = "disabled", cwd = "cwd" }
+[locations.source]
+kind = "documentation"
+url = "https://roocodeinc.github.io/Roo-Code/features/mcp/using-mcp-in-roo/"
+read_on = 2026-10-16
+quote = ".roo/mcp.json within your project's root directory. disabled: true turns off the server configuration; alwaysAllow: an array of tool names from this server to automatically approve."

@@ -1,0 +1,41 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "cline"
+name = "Cline"
+vendor = "Cline Bot Inc."
+kind = "extension"
+status = "active"
+references = []
+
+# CLI and extension share the file name; the extension keeps it in VS Code's globalStorage.
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = ["$CLINE_MCP_SETTINGS_PATH", "~/.cline/data/settings/cline_mcp_settings.json"]
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type", disabled = "disabled" }
+[locations.source]
+kind = "documentation"
+url = "https://docs.cline.bot/mcp/configuring-mcp-servers"
+read_on = 2026-10-16
+quote = "~/.cline/data/settings/cline_mcp_settings.json — override with the CLINE_MCP_SETTINGS_PATH environment variable. Server entries go under mcpServers. If type is omitted it defaults to the legacy sse transport."
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.linux = "~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json"
+path.macos = "~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json"
+path.windows = "%APPDATA%\\Code\\User\\globalStorage\\saoudrizwan.claude-dev\\settings\\cline_mcp_settings.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type", disabled = "disabled" }
+[locations.source]
+kind = "source-code"
+url = "https://github.com/cline/cline/blob/main/apps/vscode/src/core/storage/disk.ts"
+read_on = 2026-10-16
+quote = "mcpSettings: \"cline_mcp_settings.json\" — ensureSettingsDirectoryExists(): return getGlobalStorageDir(\"settings\")"
+note = "Extension id `saoudrizwan.claude-dev` from apps/vscode/package.json (publisher saoudrizwan, name claude-dev), read 2026-10-16. globalStorage sits under the VS Code user folder (see vscode.toml). Same layout for VSCodium (~/.config/VSCodium/User/…) and Cursor (~/.config/Cursor/User/…): to confirm, not read in v0."

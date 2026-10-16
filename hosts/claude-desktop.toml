@@ -1,0 +1,28 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "claude-desktop"
+name = "Claude Desktop"
+vendor = "Anthropic"
+kind = "desktop"
+status = "active"
+# Variables the host expands itself: references, not secrets.
+references = []
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.macos = "~/Library/Application Support/Claude/claude_desktop_config.json"
+path.windows = "%APPDATA%\\Claude\\claude_desktop_config.json"
+path.linux = "~/.config/Claude/claude_desktop_config.json"
+map = { command = "command", args = "args", env = "env" }
+[locations.source]
+kind = "documentation"
+url = "https://modelcontextprotocol.io/quickstart/user"
+read_on = 2026-10-16
+quote = "The file is located at: macOS: ~/Library/Application Support/Claude/claude_desktop_config.json — Windows: %APPDATA%\\Claude\\claude_desktop_config.json"
+note = "No Linux path in the documentation (there is no official Claude Desktop for Linux). The Linux path was observed on 2026-10-16 on a community build that repackages the Windows application; the file also carries other application settings, only `mcpServers` is read. The documentation says the application must be restarted to load a new configuration."

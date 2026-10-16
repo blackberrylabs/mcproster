@@ -1,0 +1,25 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "windsurf"
+name = "Windsurf (Cascade)"
+vendor = "Codeium"
+kind = "editor"
+status = "active"
+references = []
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = "~/.codeium/windsurf/mcp_config.json"
+map = { command = "command", args = "args", env = "env", url = ["serverUrl", "url"], headers = "headers" }
+[locations.source]
+kind = "documentation"
+url = "https://docs.windsurf.com/windsurf/cascade/mcp"
+read_on = 2026-10-16
+quote = "~/.codeium/windsurf/mcp_config.json — a JSON file that contains a list of servers that Cascade can connect to. serverUrl for remote HTTP servers (url is accepted)."
+note = "No project-level file in the documentation."

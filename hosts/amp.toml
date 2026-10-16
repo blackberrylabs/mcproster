@@ -1,0 +1,38 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "amp"
+name = "Amp"
+vendor = "Sourcegraph"
+kind = "cli"
+status = "active"
+references = []
+
+[[locations]]
+scope = "user"
+format = "jsonc"
+servers_key = "amp.mcpServers"
+entry = "object"
+path.any = ["~/.config/amp/settings.json", "~/.config/amp/settings.jsonc"]
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers" }
+[locations.source]
+kind = "documentation"
+url = "https://ampcode.com/docs/cli/settings"
+read_on = 2026-10-16
+quote = "~/.config/amp/settings.json (JSON) or ~/.config/amp/settings.jsonc (JSONC) on macOS and Linux; %USERPROFILE%\\.config\\amp\\settings.json on Windows. amp.mcpServers (object): Model Context Protocol servers that expose tools."
+note = "Server fields not quoted by the settings page (assumed command/args/env or url/headers): to verify on https://ampcode.com/docs/customize/mcp. amp.mcpPermissions may block a declared server: shown as disabled when a reject rule matches (later)."
+
+[[locations]]
+scope = "project"
+format = "jsonc"
+servers_key = "amp.mcpServers"
+entry = "object"
+path.any = [".amp/settings.json", ".amp/settings.jsonc"]
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers" }
+[locations.source]
+kind = "documentation"
+url = "https://ampcode.com/docs/cli/settings"
+read_on = 2026-10-16
+quote = "Workspace settings use the same two names inside a .amp/ folder"

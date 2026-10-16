@@ -1,0 +1,38 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "qwen-code"
+name = "Qwen Code"
+vendor = "Alibaba (QwenLM)"
+kind = "cli"
+status = "active"
+references = ["$VAR", "${VAR}", "%VAR%"]
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = "~/.qwen/settings.json"
+map = { command = "command", args = "args", env = "env", cwd = "cwd", url = ["httpUrl", "url"], headers = "headers", trust = "trust" }
+[locations.source]
+kind = "documentation"
+url = "https://qwenlm.github.io/qwen-code-docs/en/users/features/mcp/"
+read_on = 2026-10-16
+quote = "User: ~/.qwen/settings.json — mcpServers holds one object per server, keyed by the server's name. Connection (one required): command (stdio), url (SSE), httpUrl (HTTP streaming). env accepts $VAR_NAME or ${VAR_NAME}."
+note = "`trust: true` skips tool confirmations for that server: reported as a finding (wide trust)."
+
+[[locations]]
+scope = "project"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = ".qwen/settings.json"
+map = { command = "command", args = "args", env = "env", cwd = "cwd", url = ["httpUrl", "url"], headers = "headers", trust = "trust" }
+[locations.source]
+kind = "documentation"
+url = "https://qwenlm.github.io/qwen-code-docs/en/users/features/mcp/"
+read_on = 2026-10-16
+quote = "Project: .qwen/settings.json"

@@ -1,0 +1,60 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "claude-code"
+name = "Claude Code"
+vendor = "Anthropic"
+kind = "cli"
+status = "active"
+references = ["${VAR}", "${VAR:-default}", "${CLAUDE_PLUGIN_ROOT}"]
+remove_hint = "claude mcp remove <name> --scope <user|local|project>"
+list_hint = "claude mcp list"
+
+# User scope: every project, private to the user.
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = "~/.claude.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://code.claude.com/docs/en/mcp"
+read_on = 2026-10-16
+quote = "User-scoped servers are stored in ~/.claude.json and provide cross-project accessibility"
+note = "The documentation does not show the JSON shape of the user scope. Observed on 2026-10-16: `claude mcp add --scope user` writes `mcpServers` at the root of ~/.claude.json; the key is absent until a server is declared. The file also holds many other settings — only `mcpServers` and `projects.*.mcpServers` are read."
+
+# Local scope (the default of `claude mcp add`): one project, private to the user.
+[[locations]]
+scope = "project"
+format = "json"
+servers_key = "projects.*.mcpServers"
+entry = "object"
+project_key = "projects.*"
+path.any = "~/.claude.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://code.claude.com/docs/en/mcp"
+read_on = 2026-10-16
+quote = "Claude Code stores it in ~/.claude.json under that project's path, so the same server won't appear in your other projects."
+note = "The keys of `projects` are absolute project paths: they tell which projects exist on this machine, which is also the natural list of roots where per-project files (.mcp.json, .cursor/mcp.json…) should be looked for. `projects.<path>.enabledMcpjsonServers` / `disabledMcpjsonServers` record the user's approval of .mcp.json servers (observed)."
+
+# Project scope: .mcp.json at the project root, shared through version control.
+[[locations]]
+scope = "project"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = ".mcp.json"
+shared_with = ["vscode"]
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://code.claude.com/docs/en/mcp"
+read_on = 2026-10-16
+quote = "Project-scoped servers enable team collaboration by storing configurations in a .mcp.json file at your project's root directory. Claude Code supports environment variable expansion in .mcp.json files: ${VAR}, ${VAR:-default}"
+note = "A JSON entry that has a url but no type is read as a stdio server (configuration error, per the documentation). VS Code reads the same file as its portable format: one file, two hosts — shown as shared, not as a duplicate."

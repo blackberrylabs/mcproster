@@ -1,0 +1,24 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "copilot-cli"
+name = "GitHub Copilot CLI"
+vendor = "GitHub"
+kind = "cli"
+status = "active"
+references = []
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = ["$COPILOT_HOME/mcp-config.json", "~/.copilot/mcp-config.json"]
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", type = "type" }
+[locations.source]
+kind = "documentation"
+url = "https://code.visualstudio.com/docs/copilot/reference/mcp-configuration"
+read_on = 2026-10-16
+quote = "Copilot user file: $COPILOT_HOME/mcp-config.json, with ~/.copilot/mcp-config.json as the fallback. It also uses mcpServers."

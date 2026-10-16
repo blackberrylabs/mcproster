@@ -1,0 +1,46 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "claude-desktop-extensions"
+name = "Claude Desktop (extensions, .mcpb)"
+vendor = "Anthropic"
+kind = "desktop"
+status = "active"
+references = ["${__dirname}", "${user_config.KEY}"]
+
+# One manifest.json per installed bundle. The server entry is `server.mcp_config`.
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "server.mcp_config"
+entry = "single"
+name_key = "name"
+path.macos = "~/Library/Application Support/Claude/Claude Extensions/*/manifest.json"
+path.windows = "%APPDATA%\\Claude\\Claude Extensions\\*\\manifest.json"
+path.linux = "~/.config/Claude/Claude Extensions/*/manifest.json"
+map = { command = "command", args = "args", env = "env" }
+[locations.source]
+kind = "documentation"
+url = "https://github.com/anthropics/mcpb/blob/main/MANIFEST.md"
+read_on = 2026-10-16
+quote = "The mcp_config object in the server configuration defines how the implementing app should execute the MCP server. ${__dirname}: This variable is replaced with the absolute path to the extension's directory."
+note = "The manifest format is documented; the installation directory is not (the documentation gives no disk path). `Claude Extensions/<id>/` was observed on 2026-10-16 on a Linux community build; the macOS and Windows paths are derived from the documented configuration directory and are to be confirmed. The directory id of a bundle installed from a file starts with `local.mcpb.` (observed)."
+
+# Installation registry: version, hash, install date, signature status, enabled flag.
+[[locations]]
+scope = "user"
+format = "json"
+role = "registry"
+servers_key = "extensions"
+entry = "object"
+path.linux = "~/.config/Claude/extensions-installations.json"
+path.macos = "~/Library/Application Support/Claude/extensions-installations.json"
+path.windows = "%APPDATA%\\Claude\\extensions-installations.json"
+map = { version = "version", installed_at = "installedAt", signature = "signatureInfo.status", source = "source" }
+[locations.source]
+kind = "observed"
+read_on = 2026-10-16
+quote = "extensions.<id>: version, hash, installedAt, manifest, signatureInfo.status, source"
+note = "Observed on a Linux community build. Per-extension enabled flag in `Claude Extensions Settings/<id>.json` (`isEnabled`), observed the same day."

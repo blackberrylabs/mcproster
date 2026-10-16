@@ -1,0 +1,27 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "goose"
+name = "Goose"
+vendor = "Block"
+kind = "cli"
+status = "active"
+references = []
+
+[[locations]]
+scope = "user"
+format = "yaml"
+servers_key = "extensions"
+entry = "object"
+path.linux = "~/.config/goose/config.yaml"
+path.macos = "~/.config/goose/config.yaml"
+path.windows = "%APPDATA%\\Block\\goose\\config\\config.yaml"
+map = { command = "cmd", args = "args", env = "envs", env_keys = "env_keys", url = "uri", headers = "headers", type = "type", enabled = "enabled" }
+[locations.source]
+kind = "documentation"
+url = "https://block.github.io/goose/docs/guides/config-file/"
+read_on = 2026-10-16
+quote = "macOS/Linux: ~/.config/goose/config.yaml — Windows: %APPDATA%\\Block\\goose\\config\\config.yaml. Extensions are configured under the extensions key, a map keyed by extension name: name, type (stdio), cmd, args, envs, env_keys, enabled, timeout."
+note = "Built-in extensions (type builtin) are not MCP servers declared by the user: listed but not counted. Remote extensions (streamable_http, uri) seen in deeplinks only: to confirm."

@@ -1,0 +1,37 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "kiro"
+name = "Kiro"
+vendor = "Amazon"
+kind = "editor"
+status = "active"
+references = []
+
+[[locations]]
+scope = "user"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = "~/.kiro/settings/mcp.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", disabled = "disabled" }
+[locations.source]
+kind = "documentation"
+url = "https://kiro.dev/docs/mcp/configuration/"
+read_on = 2026-10-16
+quote = "User: ~/.kiro/settings/mcp.json — applies globally across all workspaces. Local servers: command (required), args, env, disabled, autoApprove, disabledTools. Remote servers: url (required), headers, env, oauth, oauthScopes."
+
+[[locations]]
+scope = "project"
+format = "json"
+servers_key = "mcpServers"
+entry = "object"
+path.any = ".kiro/settings/mcp.json"
+map = { command = "command", args = "args", env = "env", url = "url", headers = "headers", disabled = "disabled" }
+[locations.source]
+kind = "documentation"
+url = "https://kiro.dev/docs/mcp/configuration/"
+read_on = 2026-10-16
+quote = "Workspace: .kiro/settings/mcp.json — applies only to the current workspace. If both files exist, configurations are merged with workspace settings taking precedence."

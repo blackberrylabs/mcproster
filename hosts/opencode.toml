@@ -1,0 +1,57 @@
+# MCProster host rule. Read by the inventory, never written.
+# Every location names where its path, format and key were read from
+# (source.kind = "documentation" | "source-code" | "observed"), the date, and the words.
+# Schema: docs/hosts.md.
+
+id = "opencode"
+name = "OpenCode"
+vendor = "Anomaly / SST"
+kind = "cli"
+status = "active"
+references = ["{env:VAR}", "{file:path}"]
+
+[[locations]]
+scope = "user"
+format = "jsonc"
+servers_key = "mcp"
+entry = "object"
+path.any = ["~/.config/opencode/opencode.json", "~/.config/opencode/opencode.jsonc", "$OPENCODE_CONFIG"]
+map = { command = "command", env = "environment", cwd = "cwd", url = "url", headers = "headers", type = "type", enabled = "enabled" }
+command_is_array = true
+[locations.source]
+kind = "documentation"
+url = "https://opencode.ai/docs/config/"
+read_on = 2026-10-16
+quote = "Global config at ~/.config/opencode/opencode.json. Specify a custom config file path using the OPENCODE_CONFIG environment variable. {env:VARIABLE_NAME} is replaced with the variable's value; {file:path} is replaced with the contents of that file."
+note = "Servers under `mcp` (https://opencode.ai/docs/mcp-servers/, read 2026-10-16): type local (command is an array that starts the server, environment) or remote (url, headers, oauth); enabled turns a server on or off. OpenCode accepts JSON and JSONC."
+
+[[locations]]
+scope = "project"
+format = "jsonc"
+servers_key = "mcp"
+entry = "object"
+path.any = ["opencode.json", "opencode.jsonc"]
+map = { command = "command", env = "environment", cwd = "cwd", url = "url", headers = "headers", type = "type", enabled = "enabled" }
+command_is_array = true
+[locations.source]
+kind = "documentation"
+url = "https://opencode.ai/docs/config/"
+read_on = 2026-10-16
+quote = "Project config at opencode.json in the project root. OpenCode checks the current directory first, then walks up to the nearest Git directory."
+
+[[locations]]
+scope = "system"
+format = "jsonc"
+servers_key = "mcp"
+entry = "object"
+path.linux = "/etc/opencode/*.json"
+path.macos = "/Library/Application Support/opencode/*.json"
+path.windows = "%ProgramData%\\opencode\\*.json"
+map = { command = "command", env = "environment", cwd = "cwd", url = "url", headers = "headers", type = "type", enabled = "enabled" }
+command_is_array = true
+[locations.source]
+kind = "documentation"
+url = "https://opencode.ai/docs/config/"
+read_on = 2026-10-16
+quote = "Managed config files, such as /Library/Application Support/opencode/ on macOS, /etc/opencode/ on Linux, and %ProgramData%\\opencode on Windows."
+note = "File names inside the managed directory are not given: the glob is a guess, to confirm."
