@@ -24,8 +24,13 @@ corrigee par ce qui a ete vu ; outils existants cherches et compares.
       gestionnaires qui ecrivent ; aucun inspecteur en lecture seule (tableau dans
       `00_cadrage/2026-10-16_inventaire_analyse.md`) — 2026-10-16
 - [x] BRIEF revision 2 (positionnement, Claude Desktop ×2, tests sur faux home) — 2026-10-16
-- [ ] Decision d'Alexandre : on continue malgre un public plus etroit et des gestionnaires existants ?
-- [ ] Depot git local, `.gitignore` (`/target`, `/dist`, `/00_cadrage/`), LICENSE MIT, README minimal
+- [x] Decision d'Alexandre : on continue — il installe son propre serveur (`apipriceindex-mcp`)
+      pour faire un banc d'essai reel : Eliot (`.mcpb`) + Apipriceindex declare dans Claude Code
+      et Claude Desktop ; inventaire relance : **3 declarations, 1 doublon**, 0 secret — 2026-10-16
+- [x] Depot git local initialise (`main`, commit 1556ed2 « Project skeleton »), `.gitignore`,
+      LICENSE MIT, README minimal — 2026-10-16
+
+**Etape 0 close le 2026-10-16.**
 
 ## Etape 1. Regles d'hotes v0 et coeur
 

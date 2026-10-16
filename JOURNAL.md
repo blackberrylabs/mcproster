@@ -7,6 +7,30 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, etape 0 close : banc d'essai reel, depot git
+
+- Trois commandes passees : `claude mcp add --scope user apipriceindex -- <binaire>` (binaire
+  Claude Code embarque dans l'app, appele par son chemin), ajout de la meme cle dans
+  `claude_desktop_config.json` (sauvegarde `.bak-2026-10-16` d'abord, JSON verifie), inventaire
+  relance : **9 hotes, 3 declarations, 1 serveur declare deux fois, 0 secret** — exactement ce
+  qui etait attendu.
+- Observations pour les regles d'hotes :
+  - `claude mcp add --scope user` ecrit dans `mcpServers` **a la racine** de `~/.claude.json`
+    (pas sous `projects`) ; la cle n'existe pas tant qu'aucun serveur n'est declare.
+  - `claude_desktop_config.json` fait 9 Ko : il porte d'autres reglages que `mcpServers`,
+    MCProster ne lit que cette cle et ne commente pas le reste.
+  - Apres redemarrage du PC, Claude Desktop (build communautaire) montre le nouveau serveur
+    dans Reglages › Connecteurs avec ses trois outils (`search_models`, `get_price`,
+    `estimate_cost`), permission par defaut « necessite une approbation ». Rien n'est su
+    sur une prise en compte a chaud : Claude avait d'abord cru a un rechargement sans
+    redemarrage, Alexandre a corrige (le PC avait ete redemarre).
+  - L'extension Eliot a pour identifiant `local.mcpb.alexandre-do.eliot` : prefixe `local.mcpb.`
+    pour une extension installee depuis un fichier, pas depuis le repertoire. Utile pour
+    distinguer « extension du catalogue » et « extension locale » dans l'inventaire.
+- Depot git initialise (`main`, commit 1556ed2), identite globale deja correcte. Pas de
+  depot distant tant qu'il n'y a pas de code.
+- Etape 0 close dans PLAN.md. Suite : etape 1 (regles d'hotes sourcees, lecteurs, fixtures).
+
 ## 2026-10-16, serveur Apipriceindex installe ; Claude Desktop communautaire
 
 - Alexandre propose d'installer son propre serveur MCP (`apipriceindex-mcp` 0.1.1, PyPI,
