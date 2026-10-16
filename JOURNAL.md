@@ -7,6 +7,25 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, premier passage reel et sonde
+
+- `mcproster list|findings|files` sur la vraie machine : 6 hotes avec fichier, 3
+  declarations, 1 constat (le doublon volontaire `apipriceindex-mcp`, Claude Code + Claude
+  Desktop). Claude Code ne connait que deux projets ici (MonQuiver.fr, Nimeria_poa), aucun
+  `.mcp.json` dedans. `files` affichait « 0 declaration » pour le registre et les reglages
+  des extensions : corrige (« versions and install dates », « enabled flag »).
+- Sonde (`probe.rs`) : lance le serveur comme l'hote (commande, arguments, variables
+  relues en clair dans le fichier au moment de la sonde, passees au processus enfant,
+  jamais gardees), `initialize` → `notifications/initialized` → `tools/list`, delai global
+  10 s, processus tue a la fin. Resultat : nom et version du serveur, version du
+  protocole, noms d'outils (premiere ligne de description, 120 caracteres), erreur, debut
+  de stderr en cas d'echec. Faux serveur Python pour les tests (reponse, delai depasse,
+  commande absente, references `${VAR}` developpees pour l'enfant seulement).
+- Decision prise et soumise a Alexandre : **pas de sonde HTTP/SSE en v0**, la regle R2
+  (aucune sortie reseau) l'emporte sur la question ouverte du BRIEF.
+- Resultats de sonde ecrits dans `~/.config/mcproster/probes.json`, seul fichier que
+  MCProster ecrit (R8) ; `list` les rappelle (« probed 2026-10-16: 2 tool(s) »).
+
 ## 2026-10-16, etape 1 : le coeur, la CLI, le faux home
 
 - Workspace Rust (`crates/core`, `crates/cli`), `#![forbid(unsafe_code)]`, regles d'hotes

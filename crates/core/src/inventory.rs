@@ -53,7 +53,7 @@ pub fn run(rules: &Rules, env: &Env) -> Inventory {
     for host in &rules.hosts {
         let mut files_found = 0;
         let mut decls = 0;
-        for loc in &host.locations {
+        for (li, loc) in host.locations.iter().enumerate() {
             for (file, project) in resolve(loc, env, &roots) {
                 if !file.is_file() {
                     continue;
@@ -72,6 +72,7 @@ pub fn run(rules: &Rules, env: &Env) -> Inventory {
                             declarations: 0,
                             source_kind: loc.source.kind,
                             legacy: loc.legacy,
+                            role: loc.role.clone(),
                         });
                         findings.push(Finding {
                             kind: FindingKind::Unreadable,
@@ -87,7 +88,7 @@ pub fn run(rules: &Rules, env: &Env) -> Inventory {
                     Some("registry") => collect_registry(loc, &tree, &mut meta),
                     Some("settings") => collect_settings(loc, &file, &tree, &mut meta),
                     _ => {
-                        for d in extract(host, loc, &file, &text, &tree, project.as_deref()) {
+                        for d in extract(host, loc, li, &file, &text, &tree, project.as_deref()) {
                             count += 1;
                             merge(&mut declarations, d);
                         }
@@ -104,6 +105,7 @@ pub fn run(rules: &Rules, env: &Env) -> Inventory {
                     declarations: count,
                     source_kind: loc.source.kind,
                     legacy: loc.legacy,
+                    role: loc.role.clone(),
                 });
             }
         }
@@ -296,15 +298,13 @@ fn scalar(v: &Value) -> String {
     }
 }
 
-/// Translate every declaration of one file.
-fn extract(
-    host: &HostRule,
+/// The (name, project, spec) entries a location designates in a tree.
+pub fn entries<'a>(
     loc: &Location,
     file: &Path,
-    text: &str,
-    tree: &Value,
+    tree: &'a Value,
     project: Option<&Path>,
-) -> Vec<Declaration> {
+) -> Vec<(String, Option<PathBuf>, &'a Value)> {
     let mut out = Vec::new();
     for (wild, node) in dig(tree, &loc.servers_key) {
         // The project path may be a key inside the file (Claude Code local scope).
@@ -360,23 +360,33 @@ fn extract(
             if first_str(spec, &loc.mapped("type")).as_deref() == Some("builtin") {
                 continue;
             }
-            out.push(declaration(
-                host,
-                loc,
-                file,
-                text,
-                &name,
-                spec,
-                project.clone(),
-            ));
+            out.push((name, project.clone(), spec));
         }
     }
     out
 }
 
+/// Translate every declaration of one file.
+fn extract(
+    host: &HostRule,
+    loc: &Location,
+    li: usize,
+    file: &Path,
+    text: &str,
+    tree: &Value,
+    project: Option<&Path>,
+) -> Vec<Declaration> {
+    entries(loc, file, tree, project)
+        .into_iter()
+        .map(|(name, project, spec)| declaration(host, loc, li, file, text, &name, spec, project))
+        .collect()
+}
+
+#[allow(clippy::too_many_arguments)]
 fn declaration(
     host: &HostRule,
     loc: &Location,
+    li: usize,
     file: &Path,
     text: &str,
     name: &str,
@@ -479,7 +489,51 @@ fn declaration(
         version,
         source_kind: loc.source.kind,
         path_args,
+        origin: (host.id.clone(), li),
     }
+}
+
+/// What is needed to start a server: command, args, environment (clear), working dir.
+pub type Launch = (
+    String,
+    Vec<String>,
+    BTreeMap<String, String>,
+    Option<PathBuf>,
+);
+
+/// Re-read the raw spec of a declaration (command, args, env in clear) for the probe. The
+/// values are returned to the caller and never stored.
+pub fn raw_launch(rules: &Rules, d: &Declaration) -> Option<Launch> {
+    let host = rules.host(&d.origin.0)?;
+    let loc = host.locations.get(d.origin.1)?;
+    let (_, tree) = read_tree(&d.file, loc.format).ok()?;
+    let project = d.project.as_deref();
+    let (_, _, spec) = entries(loc, &d.file, &tree, project)
+        .into_iter()
+        .find(|(name, p, _)| {
+            *name == d.name && (loc.project_key.is_none() || p.as_deref() == project)
+        })?;
+    let mut command = first_str(spec, &loc.mapped("command"));
+    let mut args: Vec<String> = first_node(spec, &loc.mapped("args"))
+        .map(str_list)
+        .unwrap_or_default();
+    if loc.command_is_array {
+        if let Some(arr) = first_node(spec, &loc.mapped("command")).and_then(Value::as_array) {
+            let mut items: Vec<String> = arr.iter().map(scalar).collect();
+            if !items.is_empty() {
+                command = Some(items.remove(0));
+                args = items;
+            }
+        }
+    }
+    let env: BTreeMap<String, String> = match first_node(spec, &loc.mapped("env")) {
+        Some(Value::Object(o)) => o.iter().map(|(k, v)| (k.clone(), scalar(v))).collect(),
+        _ => BTreeMap::new(),
+    };
+    let cwd = first_str(spec, &loc.mapped("cwd"))
+        .map(PathBuf::from)
+        .or_else(|| d.project.clone());
+    Some((command?, args, env, cwd))
 }
 
 fn kv_pairs(node: Option<&Value>) -> Vec<(String, Masked)> {

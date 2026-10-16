@@ -56,9 +56,9 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 ## Etape 2. CLI complete et verification sur la vraie machine
 
 - [x] `mcproster hosts | list | findings | files`, `--json`, `--home <dir>`, `--root <dir>` (sonde : etape suivante) — 2026-10-16
-- [ ] Sonde stdio : `initialize` + `tools/list`, delai 10 s, aucun outil appele ; resultats dates dans `~/.config/mcproster/`
-- [ ] Sonde HTTP/SSE : a trancher (question ouverte du BRIEF)
-- [ ] Passage sur la machine d'Alexandre, sortie relue, defauts corriges
+- [x] Sonde stdio : `mcproster probe <serveur>`, `initialize` + `tools/list`, delai 10 s (`--timeout`), aucun outil appele, processus arrete ; resultats dates dans `~/.config/mcproster/probes.json` (noms, versions, outils — jamais une valeur de config), repris dans `list` — 2026-10-16
+- [x] Sonde HTTP/SSE : **non, en v0** — R2 « aucune sortie reseau » tranche ; `probe` repond « remote server, not probed ». A revoir si Alexandre le souhaite — 2026-10-16
+- [x] Premier passage sur la machine d'Alexandre : 6 hotes avec fichier, 3 declarations, le doublon volontaire ; `files` corrige (metadonnees ≠ declarations). Sonde reelle a lancer sur `apipriceindex` et `eliot` — 2026-10-16
 
 ## Etape 3. Application iced
 

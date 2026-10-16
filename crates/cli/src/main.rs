@@ -9,7 +9,10 @@ use clap::{Parser, Subcommand};
 use mcproster_core::env::Os;
 use mcproster_core::hosts::SourceKind;
 use mcproster_core::model::{FindingKind, Transport};
+use mcproster_core::probe;
 use mcproster_core::{inventory, Env, Inventory, Rules};
+use std::collections::BTreeMap;
+use std::time::Duration;
 
 /// Print a line; a closed pipe (`| head`) ends the program quietly instead of panicking.
 macro_rules! out {
@@ -33,7 +36,7 @@ fn short(path: &Path, home: &Path) -> String {
 #[command(
     name = "mcproster",
     version,
-    about = "Read-only inventory of the MCP servers declared on this machine, across assistant hosts. Reads configuration files, writes nothing, sends nothing."
+    about = "Read-only inventory of the MCP servers declared on this machine, across assistant hosts. Reads configuration files, never writes to them, sends nothing."
 )]
 struct Cli {
     /// Inventory another home directory (a test fixture, a mounted backup) instead of yours.
@@ -60,6 +63,15 @@ enum Command {
     Findings,
     /// The files that were looked at.
     Files,
+    /// Start one declared server as its host would, ask it `initialize` and `tools/list`, stop it.
+    /// On demand only; nothing else is called; remote servers are not contacted.
+    Probe {
+        /// Server name as declared, or its identity as shown by `list`.
+        server: String,
+        /// Time limit in seconds for the whole exchange.
+        #[arg(long, default_value_t = 10)]
+        timeout: u64,
+    },
 }
 
 fn main() -> Result<()> {
@@ -80,6 +92,9 @@ fn main() -> Result<()> {
     }
     match cli.command {
         Command::Hosts => unreachable!(),
+        Command::Probe { server, timeout } => {
+            return probe_cmd(&rules, &inv, &env, &server, timeout)
+        }
         Command::List => list(&inv, &env),
         Command::Findings => findings(&inv, &env),
         Command::Files => files(&inv, &env),
@@ -145,6 +160,7 @@ fn hosts(rules: &Rules, json: bool) -> Result<()> {
 }
 
 fn list(inv: &Inventory, env: &Env) {
+    let probes = probe::load_results(&env.home);
     let hosts_with_files = inv.hosts.iter().filter(|h| h.files_found > 0).count();
     out!(
         "{} host(s) with configuration, {} declaration(s), {} server(s), {} finding(s)",
@@ -161,7 +177,24 @@ fn list(inv: &Inventory, env: &Env) {
         } else {
             String::new()
         };
-        out!("{}{}", s.identity, mark);
+        let probed = match probes.get(&s.identity) {
+            Some(r) if r.ok => format!(
+                "  — probed {}: {} tool(s){}",
+                &r.at[..10],
+                r.tools.len(),
+                r.server_version
+                    .as_ref()
+                    .map(|v| format!(", server {v}"))
+                    .unwrap_or_default()
+            ),
+            Some(r) => format!(
+                "  — probed {}: failed ({})",
+                &r.at[..10],
+                r.error.clone().unwrap_or_default()
+            ),
+            None => String::new(),
+        };
+        out!("{}{}{}", s.identity, mark, probed);
         for &i in &s.declarations {
             let d = &inv.declarations[i];
             let transport = match d.transport {
@@ -248,9 +281,11 @@ fn findings(inv: &Inventory, env: &Env) {
 
 fn files(inv: &Inventory, env: &Env) {
     for f in &inv.files {
-        let status = match &f.error {
-            Some(e) => format!("unreadable: {e}"),
-            None => format!("{} declaration(s)", f.declarations),
+        let status = match (&f.error, f.role.as_deref()) {
+            (Some(e), _) => format!("unreadable: {e}"),
+            (None, Some("registry")) => "versions and install dates".to_string(),
+            (None, Some("settings")) => "enabled flag".to_string(),
+            (None, _) => format!("{} declaration(s)", f.declarations),
         };
         let legacy = if f.legacy { " [legacy]" } else { "" };
         out!(
@@ -273,4 +308,113 @@ fn files(inv: &Inventory, env: &Env) {
                 .join(", ")
         );
     }
+}
+
+fn probe_cmd(rules: &Rules, inv: &Inventory, env: &Env, server: &str, timeout: u64) -> Result<()> {
+    let matching: Vec<usize> = inv
+        .declarations
+        .iter()
+        .enumerate()
+        .filter(|(_, d)| d.name == server || d.identity() == server)
+        .map(|(i, _)| i)
+        .collect();
+    if matching.is_empty() {
+        anyhow::bail!(
+            "no declared server named `{server}` (names and identities come from `mcproster list`)"
+        );
+    }
+    let mut results = probe::load_results(&env.home);
+    let mut changed = false;
+    // One probe per distinct launch (command + args), not per declaration.
+    let mut seen: BTreeMap<String, ()> = BTreeMap::new();
+    for i in matching {
+        let d = &inv.declarations[i];
+        if d.transport != Transport::Stdio {
+            out!(
+                "{} ({}): remote server, not probed — MCProster never opens a network connection.",
+                d.name,
+                d.host_names.join(" + ")
+            );
+            continue;
+        }
+        let Some((command, args, child_env, cwd)) = inventory::raw_launch(rules, d) else {
+            out!(
+                "{} ({}): cannot read its launch command any more.",
+                d.name,
+                d.host_names.join(" + ")
+            );
+            continue;
+        };
+        let key = format!("{command} {}", args.join(" "));
+        if seen.insert(key, ()).is_some() {
+            continue;
+        }
+        let dir = d
+            .file
+            .parent()
+            .map(|p| p.display().to_string())
+            .unwrap_or_default();
+        let command = command.replace("${__dirname}", &dir);
+        let args: Vec<String> = args
+            .iter()
+            .map(|a| a.replace("${__dirname}", &dir))
+            .collect();
+        out!(
+            "Starting `{}` as {} would, for at most {timeout} s. Only `initialize` and `tools/list` are sent.",
+            format!("{command} {}", args.join(" ")).trim_end().replace(&env.home.display().to_string(), "~"),
+            d.host_names.join(" + ")
+        );
+        let r = probe::probe_stdio(
+            &command,
+            &args,
+            &child_env,
+            cwd.as_deref(),
+            &env.vars,
+            Duration::from_secs(timeout),
+        );
+        if r.ok {
+            out!(
+                "  OK in {} ms — {}{}, protocol {}",
+                r.duration_ms,
+                r.server_name
+                    .clone()
+                    .unwrap_or_else(|| "unnamed server".into()),
+                r.server_version
+                    .as_ref()
+                    .map(|v| format!(" {v}"))
+                    .unwrap_or_default(),
+                r.protocol_version.clone().unwrap_or_else(|| "?".into())
+            );
+            out!("  {} tool(s):", r.tools.len());
+            for t in &r.tools {
+                out!(
+                    "    {:<28} {}",
+                    t.name,
+                    t.description.clone().unwrap_or_default()
+                );
+            }
+        } else {
+            out!(
+                "  FAILED after {} ms: {}",
+                r.duration_ms,
+                r.error.clone().unwrap_or_default()
+            );
+            for l in r.stderr.iter().take(5) {
+                out!("    stderr: {l}");
+            }
+        }
+        results.insert(d.identity(), r);
+        changed = true;
+    }
+    if !changed {
+        return Ok(());
+    }
+    match probe::save_results(&env.home, &results) {
+        Ok(()) => out!(
+            "Results kept in {} (names, versions, tool names; no configuration value).",
+            short(&probe::results_file(&env.home), &env.home)
+        ),
+        Err(e) => out!("Results not saved ({e})."),
+    }
+    Ok(())
 }

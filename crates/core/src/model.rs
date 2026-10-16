@@ -69,6 +69,10 @@ pub struct Declaration {
     pub source_kind: SourceKind,
     /// Local filesystem paths given as arguments.
     pub path_args: Vec<PathBuf>,
+    /// Rule and location this came from (`hosts[0]`, index in its `locations`), so the
+    /// probe can re-read the raw spec. Not shown.
+    #[serde(skip)]
+    pub origin: (String, usize),
 }
 
 impl Declaration {
@@ -145,4 +149,6 @@ pub struct FileStatus {
     pub declarations: usize,
     pub source_kind: SourceKind,
     pub legacy: bool,
+    /// `registry` / `settings` for metadata files, `None` for declaration files.
+    pub role: Option<String>,
 }

@@ -7,8 +7,10 @@
 //! skipped confirmations, unreadable files).
 //!
 //! Three promises, enforced here and tested:
-//! - nothing is ever written: no `File::create`, no `remove`, no `rename` in this crate;
-//! - nothing leaves the machine: no network code in this crate;
+//! - no configuration file is ever written: the only writes are the probe results under
+//!   `~/.config/mcproster/` ([`probe::save_results`]);
+//! - nothing leaves the machine: no network code in this crate; remote servers are listed,
+//!   never contacted;
 //! - a secret is masked the moment it is read and never stored in clear.
 #![forbid(unsafe_code)]
 
@@ -16,6 +18,7 @@ pub mod env;
 pub mod hosts;
 pub mod inventory;
 pub mod model;
+pub mod probe;
 pub mod read;
 pub mod secrets;
 
