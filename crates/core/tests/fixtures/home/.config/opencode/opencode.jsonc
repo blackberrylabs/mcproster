@@ -1,0 +1,8 @@
+{
+  // OpenCode global config
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "context7": {"type": "local", "command": ["npx", "-y", "@upstash/context7-mcp"], "enabled": true},
+    "remote": {"type": "remote", "url": "https://mcp.example.com/mcp", "headers": {"Authorization": "Bearer {env:MY_API_KEY}"}},
+  },
+}

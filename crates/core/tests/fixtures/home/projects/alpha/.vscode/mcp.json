@@ -1,0 +1,7 @@
+{
+  // Playwright for browser tests
+  "inputs": [{"id": "pw-token", "type": "promptString", "password": true}],
+  "servers": {
+    "playwright": {"type": "stdio", "command": "npx", "args": ["-y", "@playwright/mcp@0.0.30"], "env": {"TOKEN": "${input:pw-token}"}},
+  },
+}

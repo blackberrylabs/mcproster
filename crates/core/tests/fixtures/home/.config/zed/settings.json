@@ -1,0 +1,7 @@
+// Zed settings
+{
+  "theme": "One Dark",
+  "context_servers": {
+    "ghost": {"command": "ghost-mcp", "args": []},
+  },
+}

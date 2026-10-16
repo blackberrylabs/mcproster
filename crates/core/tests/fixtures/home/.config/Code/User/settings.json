@@ -1,0 +1,5 @@
+{
+  "editor.fontSize": 14,
+  // legacy MCP setting
+  "mcp": {"servers": {"old": {"command": "old-mcp"}}}
+}

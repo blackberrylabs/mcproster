@@ -1,0 +1,18 @@
+[package]
+name = "mcproster-cli"
+description = "MCProster command line: hosts, list, findings"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "mcproster"
+path = "src/main.rs"
+
+[dependencies]
+mcproster-core = { path = "../core" }
+anyhow.workspace = true
+serde_json.workspace = true
+clap.workspace = true

@@ -41,18 +41,21 @@ feuille d'appel ; tests verts ; zero source `to-verify`.
 - [x] `hosts/*.toml` : 19 hotes lus (38 emplacements), 6 hotes ecartes avec la raison
       (`_not-read.toml`) ; chaque emplacement cite sa source (doc, code source ou observe),
       la date et la citation ; `docs/hosts.md` genere — 2026-10-16
-- [ ] Relecture des regles par Alexandre (`docs/hosts.md`)
-- [ ] Lecteurs : JSON, JSONC (commentaires VS Code), TOML, YAML → modele commun `Server`
-- [ ] Portees : globale, par projet (ou chercher les `.mcp.json` / `.cursor/mcp.json` ? question ouverte du BRIEF)
-- [ ] Doublons (meme paquet/binaire ou meme URL), versions cote a cote
-- [ ] Secrets : detection par nom et par forme, masquage, test « aucune valeur en clair dans aucune sortie »
-- [ ] Verification statique : commande dans `PATH`, paquet dans le cache npx/uv/pip, binaire executable
-- [ ] Acces larges : arguments qui sont des chemins, lecture des racines (`/`, `/home`, `~`)
-- [ ] Commandes d'hote pour retirer/ajouter, quand elles existent (`claude mcp`, `codex mcp`…), affichees seulement
+- [x] Relecture des regles par Alexandre : « rien ne me choque » — 2026-10-16
+- [x] Lecteurs : JSON, JSONC (commentaires, virgules finales), TOML, YAML → un arbre commun, puis `Declaration` — 2026-10-16
+- [x] Portees : user, project, system ; racines de projet = `--root` + les cles `projects` de `~/.claude.json` (reponse a la question ouverte du BRIEF) — 2026-10-16
+- [x] Doublons (meme paquet, URL ou binaire ; `node <script>` compte le script), versions cote a cote ; fichier partage `.mcp.json` = une declaration pour deux hotes — 2026-10-16
+- [x] Secrets : detection par nom et par forme, references `${…}` jamais masquees, test « aucune valeur en clair dans toute la sortie » — 2026-10-16
+- [x] Verification statique : commande dans `PATH` ou chemin existant (`${__dirname}` resolu) ; cache npx/uv non lu (v0.2) — 2026-10-16
+- [x] Acces larges : arguments-chemins, constat sur `/`, `/home`, `/Users`, `~`, racine Windows — 2026-10-16
+- [ ] Commandes d'hote pour retirer, quand elles existent (`remove_hint` dans la regle : Claude Code, Codex), a afficher dans `findings` (v0.2)
+
+Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixtures/home`,
+19 hotes, 26 declarations, 19 constats attendus, « rien n'est ecrit », « aucun secret en clair »).
 
 ## Etape 2. CLI complete et verification sur la vraie machine
 
-- [ ] `mcproster hosts | list | findings | probe <serveur> | --json`
+- [x] `mcproster hosts | list | findings | files`, `--json`, `--home <dir>`, `--root <dir>` (sonde : etape suivante) — 2026-10-16
 - [ ] Sonde stdio : `initialize` + `tools/list`, delai 10 s, aucun outil appele ; resultats dates dans `~/.config/mcproster/`
 - [ ] Sonde HTTP/SSE : a trancher (question ouverte du BRIEF)
 - [ ] Passage sur la machine d'Alexandre, sortie relue, defauts corriges

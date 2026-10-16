@@ -13,7 +13,7 @@ references = []
 [[locations]]
 scope = "user"
 format = "jsonc"
-servers_key = "amp.mcpServers"
+servers_key = 'amp\.mcpServers'
 entry = "object"
 path.any = ["~/.config/amp/settings.json", "~/.config/amp/settings.jsonc"]
 map = { command = "command", args = "args", env = "env", url = "url", headers = "headers" }
@@ -27,7 +27,7 @@ note = "Server fields not quoted by the settings page (assumed command/args/env 
 [[locations]]
 scope = "project"
 format = "jsonc"
-servers_key = "amp.mcpServers"
+servers_key = 'amp\.mcpServers'
 entry = "object"
 path.any = [".amp/settings.json", ".amp/settings.jsonc"]
 map = { command = "command", args = "args", env = "env", url = "url", headers = "headers" }

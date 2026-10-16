@@ -1,0 +1,21 @@
+[package]
+name = "mcproster-core"
+description = "Read-only inventory of the MCP servers declared on a machine, across assistant hosts"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+serde_yaml_ng.workspace = true
+glob.workspace = true
+regex.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

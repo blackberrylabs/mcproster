@@ -7,6 +7,31 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, etape 1 : le coeur, la CLI, le faux home
+
+- Workspace Rust (`crates/core`, `crates/cli`), `#![forbid(unsafe_code)]`, regles d'hotes
+  embarquees par `include_str!` et validees au chargement (une regle sans source est
+  refusee — la validation a attrape un oubli dans la regle Continue des le premier essai).
+- Coeur : `env` (home, variables, OS, PATH, racines — jamais `std::env` dans l'inventaire,
+  les tests sont hermetiques), `read` (JSON, JSONC, TOML, YAML → un seul arbre ; `dig` avec
+  `*` et `\.`), `secrets` (reference / secret / ordinaire ; masque `6…4`), `model`,
+  `inventory` (resolution des emplacements, extraction, fusion des fichiers partages,
+  metadonnees des extensions `.mcpb`, constats, regroupement par identite).
+- Identite d'un serveur : URL, sinon paquet derriere `npx`/`uvx`/`pipx`/`bunx` (version
+  retiree), sinon nom du binaire ; pour `node`/`python`, le script compte.
+- Faux home de test : 19 hotes, 32 fichiers, `__HOME__` remplace a la copie. 26
+  declarations, 19 constats attendus ; tests « rien n'est ecrit » et « aucun secret en
+  clair dans toute la sortie JSON ».
+- Deux defauts trouves par les tests avant toute execution reelle : la cle `amp.mcpServers`
+  contient un point (ajout de `\.` dans les chemins de cles) ; la portee *project* « dans
+  le fichier » de Claude Code etait resolue comme un chemin relatif a un projet.
+- CLI : `hosts`, `list`, `findings`, `files`, `--json`, `--home`, `--root`. Chemins
+  raccourcis en `~`, `| head` ne fait plus paniquer.
+- Le pont de fichiers refuse d'ecrire `.claude.json`, `.mcp.json` et `.vscode/` meme dans
+  un dossier de fixtures : ecrits par le shell a la place, empreintes verifiees.
+- Binaire release compile dans le cloud (glibc 2.39 = Ubuntu 24.04), depose hors git dans
+  `00_cadrage/bin/mcproster` pour le premier passage sur la vraie machine.
+
 ## 2026-10-16, etape 1 : regles d'hotes sourcees
 
 - 19 hotes, 38 emplacements, ecrits en TOML (`hosts/`), chaque emplacement avec sa source :

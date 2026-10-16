@@ -24,7 +24,7 @@ list_hint = "…"
 [[locations]]
 scope = "user"                # user | project | system
 format = "json"               # json | jsonc | toml | yaml
-servers_key = "mcpServers"    # dotted path to the servers; `*` matches any key
+servers_key = "mcpServers"    # dotted path to the servers; `*` matches any key; `\.` a literal dot
 entry = "object"              # object: name → spec · array: list of specs with name_key · single: one spec
 name_key = "name"             # for array / single
 project_key = "projects.*"    # when the project path is a key inside the file (Claude Code local scope)

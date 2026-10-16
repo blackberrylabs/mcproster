@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "shared-db": {
+      "command": "node",
+      "args": [
+        "./server.js"
+      ],
+      "env": {
+        "DB_URL": "${DB_URL:-postgres://localhost/db}"
+      }
+    }
+  }
+}

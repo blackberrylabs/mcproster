@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "weather": {
+      "command": "node",
+      "args": [
+        "__HOME__/tools/weather/index.js"
+      ],
+      "alwaysAllow": []
+    }
+  }
+}

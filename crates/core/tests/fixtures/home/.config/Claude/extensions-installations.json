@@ -1,0 +1,13 @@
+{
+  "extensions": {
+    "local.mcpb.alexandre-do.eliot": {
+      "version": "0.1.0",
+      "hash": "abc",
+      "installedAt": "2026-10-14T10:00:00Z",
+      "signatureInfo": {
+        "status": "unsigned"
+      },
+      "source": "local"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "preferences": {
+    "theme": "dark"
+  },
+  "mcpServers": {
+    "apipriceindex": {
+      "command": "__HOME__/.local/bin/apipriceindex-mcp"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@1.2.0",
+        "/home"
+      ]
+    },
+    "openai": {
+      "command": "uvx",
+      "args": [
+        "openai-mcp"
+      ],
+      "env": {
+        "OPENAI_API_KEY": "sk-proj-abcdefghijklmnopqrstuvwxyz0123456789",
+        "OPENAI_BASE_URL": "https://api.openai.com/v1"
+      }
+    }
+  }
+}

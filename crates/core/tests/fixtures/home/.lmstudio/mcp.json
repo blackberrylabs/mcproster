@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "hf": {
+      "url": "https://huggingface.co/mcp?login=true&api_key=0123456789abcdef0123456789abcdef"
+    }
+  }
+}

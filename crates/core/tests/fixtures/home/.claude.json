@@ -1,0 +1,28 @@
+{
+  "numStartups": 12,
+  "mcpServers": {
+    "apipriceindex": {
+      "command": "__HOME__/.local/bin/apipriceindex-mcp"
+    }
+  },
+  "projects": {
+    "__HOME__/projects/alpha": {
+      "allowedTools": [],
+      "mcpServers": {
+        "github": {
+          "type": "http",
+          "url": "https://api.githubcopilot.com/mcp/",
+          "headers": {
+            "Authorization": "Bearer ${GITHUB_TOKEN}"
+          }
+        }
+      },
+      "enabledMcpjsonServers": [
+        "shared-db"
+      ]
+    },
+    "__HOME__/projects/beta": {
+      "allowedTools": []
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "manifest_version": "0.2",
+  "name": "eliot",
+  "version": "0.1.0",
+  "server": {
+    "type": "binary",
+    "entry_point": "server/eliot-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/server/eliot-mcp",
+      "args": [],
+      "env": {}
+    }
+  },
+  "tools": [
+    {
+      "name": "etat"
+    },
+    {
+      "name": "exporter"
+    }
+  ]
+}

@@ -44,6 +44,7 @@ scope = "user"
 format = "json"
 servers_key = "experimental.modelContextProtocolServers"
 entry = "array"
+name_key = "name"
 legacy = true
 path.any = "~/.continue/config.json"
 map = { command = "transport.command", args = "transport.args", env = "transport.env", url = "transport.url", type = "transport.type" }

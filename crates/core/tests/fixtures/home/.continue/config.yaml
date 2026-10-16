@@ -1,0 +1,8 @@
+name: Local config
+version: 1.0.0
+mcpServers:
+  - name: memory
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-memory"]
+    env:
+      SUPABASE_TOKEN: ${{ secrets.SUPABASE_TOKEN }}

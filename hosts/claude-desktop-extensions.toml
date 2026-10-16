@@ -44,3 +44,21 @@ kind = "observed"
 read_on = 2026-10-16
 quote = "extensions.<id>: version, hash, installedAt, manifest, signatureInfo.status, source"
 note = "Observed on a Linux community build. Per-extension enabled flag in `Claude Extensions Settings/<id>.json` (`isEnabled`), observed the same day."
+
+# Per-extension enabled flag: one file per bundle, named after its id.
+[[locations]]
+scope = "user"
+format = "json"
+role = "settings"
+servers_key = ""
+entry = "single"
+name_key = "id"
+path.linux = "~/.config/Claude/Claude Extensions Settings/*.json"
+path.macos = "~/Library/Application Support/Claude/Claude Extensions Settings/*.json"
+path.windows = "%APPDATA%\\Claude\\Claude Extensions Settings\\*.json"
+map = { enabled = "isEnabled" }
+[locations.source]
+kind = "observed"
+read_on = 2026-10-16
+quote = "Claude Extensions Settings/<id>.json: { isEnabled }"
+note = "Observed on a Linux community build; the file name is the extension id."

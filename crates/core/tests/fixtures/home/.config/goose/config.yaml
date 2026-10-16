@@ -1,0 +1,14 @@
+GOOSE_PROVIDER: anthropic
+extensions:
+  developer:
+    name: developer
+    type: builtin
+    enabled: true
+  fetch:
+    name: fetch
+    type: stdio
+    cmd: uvx
+    args: [mcp-server-fetch]
+    envs: {}
+    enabled: true
+    timeout: 300
