@@ -7,6 +7,9 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The interface building blocks, palette, preferences and translated strings now come from
+  the shared crate [`bbl-ui`](https://github.com/blackberrylabs/bbl-ui), like the other
+  Blackberrylabs tools. Nothing visible changes.
 - The common ground of the host rules (schema, loading, validation, path resolution,
   readers, secret masking) moved to the shared crate
   [`hostrules`](https://github.com/blackberrylabs/hostrules), so the next Blackberrylabs

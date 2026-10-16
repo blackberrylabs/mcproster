@@ -3,9 +3,6 @@
 //! core as the CLI; writes only its settings and the probe results (BRIEF R8).
 #![forbid(unsafe_code)]
 
-mod i18n;
-mod settings;
-
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -24,8 +21,20 @@ use mcproster_core::model::{Declaration, FindingKind, Transport};
 use mcproster_core::probe::{self, ProbeResult};
 use mcproster_core::{inventory, Env, Inventory, Rules};
 
-use i18n::{Lang, Strings};
-use settings::Settings;
+use bbl_ui::palette::{alert, good, neutral as neutral_pill};
+use bbl_ui::widgets::{card, inner, pill, small_button, swatch};
+use bbl_ui::{Lang, Prefs, Strings};
+
+const EN: &str = include_str!("../../../locales/en.json");
+const FR: &str = include_str!("../../../locales/fr.json");
+
+/// MCProster's own preference, next to the language and theme `bbl-ui` keeps for every app.
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, PartialEq, Eq)]
+struct Extra {
+    /// `false` once the user ticked "don't ask again" before a probe.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    ask_before_probe: Option<bool>,
+}
 
 fn main() -> iced::Result {
     iced::application(App::title, App::update, App::view)
@@ -61,6 +70,7 @@ enum Message {
 const MAX_HOST_COLUMNS: usize = 6;
 
 struct App {
+    prefs: Prefs<Extra>,
     lang: Lang,
     strings: Strings,
     dark: bool,
@@ -86,18 +96,21 @@ struct App {
 
 impl App {
     fn new() -> (App, Task<Message>) {
-        let settings = Settings::load();
-        let lang = settings.initial_lang();
-        let strings = Strings::load(lang);
+        let prefs: Prefs<Extra> = Prefs::load("mcproster");
+        let lang = prefs.initial_lang();
+        let dark = prefs.initial_dark();
+        let ask_before_probe = prefs.extra.ask_before_probe.unwrap_or(true);
+        let strings = Strings::load(EN, FR, lang);
         let env = Env::current();
         let rules = Arc::new(mcproster_core::hosts::embedded());
         let probes = probe::load_results(&env.home);
         let status = strings.t("header.scanning", &[]);
         let task = load(rules.clone(), env.clone());
         let app = App {
+            prefs,
             lang,
             strings,
-            dark: settings.initial_dark(),
+            dark,
             env,
             rules,
             inventory: None,
@@ -110,7 +123,7 @@ impl App {
             selected: None,
             probes,
             probing: None,
-            ask_before_probe: settings.asks_before_probe(),
+            ask_before_probe,
             pending_probe: None,
             probe_queue: Vec::new(),
             dont_ask: false,
@@ -132,13 +145,10 @@ impl App {
         }
     }
 
-    fn remember(&self) {
-        Settings {
-            lang: Some(self.lang.code().to_string()),
-            theme: Some(if self.dark { "dark" } else { "light" }.to_string()),
-            ask_before_probe: Some(self.ask_before_probe),
-        }
-        .save();
+    fn remember(&mut self) {
+        self.prefs.remember(self.lang, self.dark);
+        self.prefs.extra.ask_before_probe = Some(self.ask_before_probe);
+        self.prefs.save();
     }
 
     fn refresh_status(&mut self) {
@@ -192,7 +202,7 @@ impl App {
             }
             Message::SetLang(l) => {
                 self.lang = l;
-                self.strings = Strings::load(l);
+                self.strings = Strings::load(EN, FR, l);
                 self.remember();
                 self.refresh_status();
             }
@@ -412,16 +422,13 @@ impl App {
         } else {
             self.strings.t("theme.dark", &[])
         };
-        let footer = row![
-            text(self.status.clone()).size(12).style(text::secondary),
-            horizontal_space(),
-            self.view_lang_picker(),
-            Space::with_width(6),
-            button(text(theme_label).size(12))
-                .style(button::text)
-                .on_press(Message::ToggleTheme),
-        ]
-        .align_y(iced::Alignment::Center);
+        let footer = bbl_ui::widgets::footer(
+            self.status.clone(),
+            self.lang,
+            Message::SetLang,
+            theme_label,
+            Message::ToggleTheme,
+        );
         column![self.view_header(), body, footer]
             .spacing(14)
             .padding(16)
@@ -459,65 +466,23 @@ impl App {
             }
         });
         row![
-            self.kpi(
-                &s.t("kpi.servers", &[]),
-                &n(servers),
-                &s.t("kpi.declarations", &[("n", &n(decls))]),
+            bbl_ui::widgets::kpi(
+                s.t("kpi.servers", &[]),
+                n(servers),
+                s.t("kpi.declarations", &[("n", &n(decls))]),
                 None
             ),
-            self.kpi(
-                &s.t("kpi.hosts", &[]),
-                &n(with),
-                &s.t("kpi.hosts_known", &[("n", &n(known))]),
+            bbl_ui::widgets::kpi(
+                s.t("kpi.hosts", &[]),
+                n(with),
+                s.t("kpi.hosts_known", &[("n", &n(known))]),
                 None
             ),
-            self.kpi(&s.t("kpi.findings", &[]), &n(findings), "", findings_dot),
-            self.kpi(&s.t("kpi.secrets", &[]), &n(secrets), "", secrets_dot),
+            bbl_ui::widgets::kpi(s.t("kpi.findings", &[]), n(findings), "", findings_dot),
+            bbl_ui::widgets::kpi(s.t("kpi.secrets", &[]), n(secrets), "", secrets_dot),
         ]
         .spacing(12)
         .into()
-    }
-
-    fn kpi<'a>(
-        &self,
-        label: &str,
-        value: &str,
-        sub: &str,
-        dot: Option<Color>,
-    ) -> Element<'a, Message> {
-        let mut head = row![].spacing(6).align_y(iced::Alignment::Center);
-        if let Some(c) = dot {
-            head = head.push(swatch(c, 8));
-        }
-        head = head.push(text(label.to_string()).size(12).style(text::secondary));
-        card(
-            column![
-                head,
-                text(value.to_string()).size(28),
-                text(sub.to_string()).size(11).style(text::secondary),
-            ]
-            .spacing(2)
-            .into(),
-        )
-        .width(Length::Fill)
-        .into()
-    }
-
-    fn view_lang_picker(&self) -> Element<'_, Message> {
-        let pick = |lang: Lang, label: &'static str| -> Element<'_, Message> {
-            let b = button(text(label).size(11)).padding([2, 7]);
-            if lang == self.lang {
-                b.style(button::primary).into()
-            } else {
-                b.style(button::text)
-                    .on_press(Message::SetLang(lang))
-                    .into()
-            }
-        };
-        row![pick(Lang::En, "EN"), pick(Lang::Fr, "FR")]
-            .spacing(2)
-            .align_y(iced::Alignment::Center)
-            .into()
     }
 
     fn view_filters(&self) -> Element<'_, Message> {
@@ -1227,7 +1192,7 @@ impl App {
                 | FindingKind::Unreadable
                 | FindingKind::ContextCost => alert(self.dark),
                 FindingKind::Duplicate | FindingKind::Disabled | FindingKind::PackageNotCached => {
-                    neutral_pill(self.dark)
+                    neutral_pill()
                 }
             };
             let mut block = column![
@@ -1323,109 +1288,6 @@ impl App {
         }
         container(col).padding([4, 0]).into()
     }
-}
-
-/// Cleanator's palette: green for "fine", orange for "look at this", grey for information.
-fn hex(rgb: u32) -> Color {
-    Color::from_rgb8(
-        ((rgb >> 16) & 0xff) as u8,
-        ((rgb >> 8) & 0xff) as u8,
-        (rgb & 0xff) as u8,
-    )
-}
-
-fn good(dark: bool) -> Color {
-    if dark {
-        hex(0x2fa32f)
-    } else {
-        hex(0x008300)
-    }
-}
-
-fn alert(dark: bool) -> Color {
-    if dark {
-        hex(0xd95926)
-    } else {
-        hex(0xeb6834)
-    }
-}
-
-fn neutral_pill(_dark: bool) -> Color {
-    hex(0x7a869a)
-}
-
-fn card<'a>(content: Element<'a, Message>) -> container::Container<'a, Message> {
-    container(content).padding(14).style(|theme: &Theme| {
-        let p = theme.extended_palette();
-        container::Style {
-            background: Some(Background::Color(p.background.weak.color)),
-            border: Border {
-                radius: 10.0.into(),
-                width: 1.0,
-                color: p.background.strong.color,
-            },
-            ..Default::default()
-        }
-    })
-}
-
-/// A detail block inside a card: the page background, rounded, like Cleanator's details.
-fn inner<'a>(content: Element<'a, Message>) -> Element<'a, Message> {
-    container(content)
-        .padding(iced::Padding {
-            top: 6.0,
-            right: 10.0,
-            bottom: 6.0,
-            left: 10.0,
-        })
-        .width(Length::Fill)
-        .style(|theme: &Theme| {
-            let p = theme.extended_palette();
-            container::Style {
-                background: Some(Background::Color(p.background.base.color)),
-                border: Border {
-                    radius: 6.0.into(),
-                    ..Default::default()
-                },
-                ..Default::default()
-            }
-        })
-        .into()
-}
-
-fn swatch<'a>(color: Color, size: u16) -> Element<'a, Message> {
-    container(Space::new(size, size))
-        .style(move |_: &Theme| container::Style {
-            background: Some(Background::Color(color)),
-            border: Border {
-                radius: (size as f32 / 3.0).into(),
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-        .into()
-}
-
-fn pill<'a>(label: String, color: Color) -> Element<'a, Message> {
-    container(text(label).size(11).color(Color::WHITE))
-        .padding([2, 8])
-        .style(move |_: &Theme| container::Style {
-            background: Some(Background::Color(color)),
-            border: Border {
-                radius: 8.0.into(),
-                ..Default::default()
-            },
-            ..Default::default()
-        })
-        .into()
-}
-
-fn small_button(label: String, msg: Message) -> Element<'static, Message> {
-    button(text(label).size(11))
-        .padding([2, 7])
-        .style(button::secondary)
-        .on_press(msg)
-        .into()
 }
 
 fn load(rules: Arc<Rules>, env: Env) -> Task<Message> {
