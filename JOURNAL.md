@@ -7,6 +7,16 @@ titre, ce qui a ete decide, par qui, ce qui a ete ecarte, et la preuve (fichier,
 
 ---
 
+## 2026-10-16, nuit — un frere
+
+- Permitt 0.1.0 publie le soir meme, sur la meme fondation (hostrules). La table des hotes de
+  Permitt a releve deux changements a repercuter ici un jour : Windsurf est devenu Devin
+  Desktop (`~/.config/Devin/`, les chemins `~/.codeium/` restent), et Gemini CLI est remplace
+  par Antigravity CLI pour les comptes gratuits depuis juin 2026. Pas urgent : les fichiers
+  lus existent toujours.
+
+---
+
 ## 2026-10-16, soir — 0.2.1, la fondation commune
 
 - Permitt decide (BRIEF valide), donc troisieme outil, donc extraction du coeur commun
