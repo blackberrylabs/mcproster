@@ -163,8 +163,11 @@ at the root (`BRIEF.md`, `PLAN.md`, `JOURNAL.md`); code, comments and documentat
 English.
 
 By [Alexandre Do](https://github.com/blackberrylabs), who also made
-[Cleanator](https://github.com/blackberrylabs/cleanator) — a disk cleaner for developers
-who run AI on Linux, built on the same principle: show, explain, never act in your place.
+[Cleanator](https://github.com/blackberrylabs/cleanator) (a disk cleaner for developers who
+run AI on Linux), [Permitt](https://github.com/blackberrylabs/permitt) (what each AI
+assistant may do without asking) and [Linstruct](https://github.com/blackberrylabs/linstruct)
+(your AI instruction files as each agent reads them) — built on the same principle: show,
+explain, never act in your place.
 
 ## License
 
