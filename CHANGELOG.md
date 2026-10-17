@@ -3,7 +3,9 @@
 All notable changes to MCProster. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/).
 
-## [0.2.1] — unreleased
+## [0.2.1] — 2026-10-17
+
+MCProster becomes a module of the Blackberrylabs control tower. Nothing changes on screen.
 
 ### Added
 

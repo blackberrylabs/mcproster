@@ -111,4 +111,4 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 - [x] Commit 11 (6e787ff) — 2026-10-16
 - [x] Interface depuis `bbl-ui` 0.1.0, zero pixel de difference (commit 13) — 2026-10-16
 - [x] `mcproster report` (`bbl-report/1`), `--select` dans l'app, mapping des gravites dans le CHANGELOG — 2026-10-16
-- [ ] Paquets 0.2.1, release — sur accord ; quand la tour lira les rapports
+- [ ] Paquets 0.2.1, release — accord donne le 2026-10-17 (« Go, tel quel ») : commit 16, build.sh, push, tag, release

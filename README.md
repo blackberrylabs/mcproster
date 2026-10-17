@@ -13,7 +13,7 @@ you. **It never writes to any of them.**
 clients; MCProster does the opposite job: it tells you what is there, where, and what to
 look at — then you act with each host's own settings.
 
-Status: **0.2.0**. Linux. 100 % Rust. MIT.
+Status: **0.2.1**. Linux. 100 % Rust. MIT.
 
 ![MCProster — light theme](docs/screenshots/light.png)
 
@@ -88,13 +88,13 @@ Packages are on the [releases page](https://github.com/blackberrylabs/mcproster/
 
 ```bash
 # Debian / Ubuntu
-sudo apt install ./mcproster_0.2.0-1_amd64.deb
+sudo apt install ./mcproster_0.2.1-1_amd64.deb
 
 # Fedora
-sudo dnf install ./mcproster-0.2.0-1.x86_64.rpm
+sudo dnf install ./mcproster-0.2.1-1.x86_64.rpm
 
 # Any distribution
-chmod +x MCProster-0.2.0-x86_64.AppImage && ./MCProster-0.2.0-x86_64.AppImage
+chmod +x MCProster-0.2.1-x86_64.AppImage && ./MCProster-0.2.1-x86_64.AppImage
 ```
 
 Each package ships both the desktop app (`mcproster-app`) and the command line
