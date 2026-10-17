@@ -18,6 +18,13 @@ for the home directory; it is replaced when the tests copy the fixture) and adju
 expected counts in `crates/core/tests/inventory.rs`. `cargo test` must stay green, and
 `docs/hosts.md` is regenerated from the rules.
 
+## Adding a kind of finding
+
+A new `FindingKind` needs its label in the CLI and the app, and its place on the four
+common severities of the Blackberrylabs tower (`severity_of` in
+`crates/core/src/report.rs`) — act now, review, good to know, information — written in the
+CHANGELOG. The tower never reinterprets.
+
 ## What will not be merged
 
 - Anything that writes to, moves or deletes a host's configuration file, even with a

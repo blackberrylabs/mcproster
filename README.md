@@ -142,6 +142,13 @@ could take. English by default, French on demand; light and dark.
 - **Context cost** figures are estimates: hosts serialise tool definitions their own way,
   and Claude Code can load tools on demand, so its figure is an upper bound.
 
+## Part of Blackberrylabs
+
+MCProster is a module of the [Blackberrylabs](https://github.com/blackberrylabs) control
+tower, which gathers what MCProster, Permitt and Cleanator find on a machine in one list, most serious
+first. `mcproster report` is what the tower reads; `mcproster-app --select` is how it opens MCProster
+at a finding. Each tool stays complete and installable on its own.
+
 ## How it is built
 
 A Rust workspace: `crates/core` (rules, inventory, probe, cost — no UI, no network),

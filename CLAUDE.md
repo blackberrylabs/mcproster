@@ -14,11 +14,25 @@ larges). Il regarde et ne touche pas : lecture seule, aucune sortie reseau, secr
 Second logiciel de Blackberrylabs apres Cleanator ; meme public, meme methode, meme recette
 technique (Rust, iced, CLI, en/fr, MIT).
 
-## Etat au 2026-10-16
+## Etat au 2026-10-17
 
-BRIEF revision 1 ecrit, six decisions tranchees (voir JOURNAL). **Pas encore valide dans son
-ensemble, pas une ligne de code.** Prochaine action : validation du BRIEF par Alexandre,
-puis etape 0 (inventaire reel de sa machine, hors git, dans `00_cadrage/`).
+**0.2.1 publiee** : module de la tour de controle Blackberrylabs (`mcproster report`,
+`mcproster-app --select <serveur>`), coeur sur `bbl-hostrules` 0.3.0, interface sur `bbl-ui`
+0.1.0. Historique complet dans `PLAN.md` et `JOURNAL.md`.
+
+## Fondations communes — ne pas recopier, completer a la source
+
+- `bbl-hostrules` (`Logiciels/Bbl_hostrules`) : regles d'hotes, env, lecteurs, masquage.
+- `bbl-ui` (`Logiciels/Bbl_ui`) : palette, briques iced, reglages, i18n.
+- `bbl-report` (`Logiciels/Bbl_report`) : le contrat de la tour. `crates/core/src/report.rs`
+  construit le `bbl-report/1` ; le mapping des `FindingKind` sur les quatre gravites est
+  dans `severity_of` et dans le CHANGELOG — toute nouvelle sorte de constat y passe.
+
+## Tour de controle
+
+MCProster est un module de Blackberrylabs (`Logiciels/Blackberrylabs`) ; marche a suivre
+d'un module : `docs/new-module.md` dans la tour. Publier le module avant la tour quand le
+contrat bouge.
 
 ## Regles de travail (reprises de Cleanator)
 
