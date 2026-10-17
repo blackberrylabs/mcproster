@@ -144,11 +144,12 @@ could take. English by default, French on demand; light and dark.
 
 ## Part of Blackberrylabs
 
-MCProster is a module of the [Blackberrylabs](https://github.com/blackberrylabs) control
-tower, which gathers what MCProster, Permitt and Cleanator find on a machine in one list, most serious
-first. `mcproster report` is what the tower reads; `mcproster-app --select` is how it opens MCProster
-at a finding. Each tool stays complete and installable on its own.
-
+MCProster is a module of the [Blackberrylabs](https://github.com/blackberrylabs) family —
+read-only tools that show what AI coding agents do to your machine. Want only MCProster?
+It is complete on its own. Want several? The
+[control tower](https://github.com/blackberrylabs/blackberrylabs) gathers what every
+module finds in one list, most serious first: `mcproster report` is what it reads, `mcproster-app --select`
+is how it opens MCProster at a finding.
 ## How it is built
 
 A Rust workspace: `crates/core` (rules, inventory, probe, cost — no UI, no network),
