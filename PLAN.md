@@ -48,7 +48,7 @@ feuille d'appel ; tests verts ; zero source `to-verify`.
 - [x] Secrets : detection par nom et par forme, references `${…}` jamais masquees, test « aucune valeur en clair dans toute la sortie » — 2026-10-16
 - [x] Verification statique : commande dans `PATH` ou chemin existant (`${__dirname}` resolu) ; cache npx/uv non lu (v0.2) — 2026-10-16
 - [x] Acces larges : arguments-chemins, constat sur `/`, `/home`, `/Users`, `~`, racine Windows — 2026-10-16
-- [ ] Commandes d'hote pour retirer, quand elles existent (`remove_hint` dans la regle : Claude Code, Codex), a afficher dans `findings` (v0.2)
+- [x] Commandes d'hote pour retirer, quand elles existent (`remove_hint` dans la regle : Claude Code, Codex), a afficher dans `findings` (v0.2) — fait en 0.2.0 (actions sous chaque constat, etape 6) et hint `claude mcp remove` (etape 7) — 2026-10-26
 
 Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixtures/home`,
 19 hotes, 26 declarations, 19 constats attendus, « rien n'est ecrit », « aucun secret en clair »).
@@ -84,8 +84,8 @@ Tests : 12 unitaires + 8 d'integration sur le faux home (`crates/core/tests/fixt
 ## Etape 5. README et presentation
 
 - [x] README complet (promesses, hotes, install, CLI, app, lecture des constats), CHANGELOG 0.1.0, CONTRIBUTING (ajouter un hote = un TOML avec sources) — 2026-10-16
-- [ ] Captures d'ecran dans le README (apres installation chez Alexandre)
-- [ ] Textes de presentation — plus tard, sur decision d'Alexandre
+- [x] Captures d'ecran dans le README (apres installation chez Alexandre) — faites a l'etape 6 (clair, sombre, home de demonstration, `docs/screenshots/`) — 2026-10-26
+- [ ] Textes de presentation — plus tard, sur decision d'Alexandre ; plan de promotion : `Logiciels/Blackberrylabs/00_cadrage/promotion.md`
 
 ## Etape 6. Version 0.2 — cout en contexte (BRIEF §11, cadre le 2026-10-16)
 
